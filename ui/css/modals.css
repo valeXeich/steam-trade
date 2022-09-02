@@ -1,0 +1,30 @@
+#default-btn {
+    background-color: #1b1c22; 
+    border: 1px solid #acacae; 
+    color: #acacae; 
+    padding: 5px 8px; 
+    border-radius: 10px
+}
+
+#default-btn::hover {
+    background-color: #3c50fa; 
+    color: #fff; 
+    border: none;
+}
+
+#default-input {
+    background-color: #25262c;
+    border-radius: 15px;
+    padding: 5px;
+    color: #acacae;
+}
+
+#login-title, #code-title {
+    color: #acacae;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+#AddItemModal, #Login, #Code {
+    background-color: #1b1c22;
+}

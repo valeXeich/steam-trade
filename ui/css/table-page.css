@@ -1,0 +1,54 @@
+#table_page {
+    color: #acacae;
+}
+
+#default-btn {
+    background-color: #1b1c22; 
+    border: 1px solid #acacae; 
+    color: #acacae; 
+    padding: 5px 8px; 
+    border-radius: 10px
+}
+
+#default-btn::hover {
+    background-color: #3c50fa; 
+    color: #fff; 
+    border: none;
+}
+
+QTableWidget {
+    gridline-color: #1b1c22;
+    border: none;
+    background-color: #1b1c22;
+ }
+
+ QTableWidget::item {
+    color: #acacae;
+    background-color: #1b1c22;
+}
+
+QTableWidget::item:focus {
+    color: #acacae;
+    background-color: #60626e;
+}
+
+ QHeaderView::section:horizontal {
+    background-color: #25262c;
+    border: none;
+    color: #acacae;
+    font-weight: bold;
+    padding: 10px;
+}
+
+QCheckBox::indicator {
+    width: 15px;
+    height: 5px;
+}
+
+QCheckBox::indicator:unchecked {
+    background-color: #ad473f;
+}
+
+QCheckBox::indicator:checked {
+    background-color: rgb(60, 131, 60);
+}

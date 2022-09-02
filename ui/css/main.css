@@ -1,0 +1,25 @@
+#main {
+    background-color: #1b1c22;
+}
+
+#title_table, #title_log, #title_setting {
+    color: #acacae;
+    font-size: 24px;
+}
+
+
+QScrollBar:vertical {
+    width: 10px;
+    background: #1b1c22;
+}
+
+QScrollBar::handle:vertical {
+	background: #34343d;
+}
+
+QScrollBar::sub-line:vertical, QScrollBar::add-line:vertical {
+    border: none;
+	background: none;
+ }
+
+ 

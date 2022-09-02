@@ -1,0 +1,63 @@
+QWidget {
+    background-color: #25262c;
+}
+
+QPushButton::hover {
+    background-color: #1b1c22;
+}
+
+QFrame {
+    border: none;
+}
+
+QPushButton#active-btn {
+    color: #acacae;
+    font-weight: bold;
+    font-size: 14px;
+    border: none;
+    margin-bottom: 5px;
+    background-color: #1b1c22;
+}
+
+QPushButton#un-active-btn {
+    color: #acacae;
+    font-weight: bold;
+    font-size: 14px;
+    border: none;
+    margin-bottom: 5px;
+}
+
+#avatar {
+    background-color: white;
+    border: 1px solid white;
+    border-radius: 19px;
+}
+
+#username {
+    color: white;
+    font-size: 14px;
+}
+
+#btn-on {
+    color: #fff;
+    background-color: rgb(60, 131, 60);
+    border-radius: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+#btn-on::hover {
+    background-color: rgb(47, 107, 47);
+}
+
+#btn-off {
+    color: #fff;
+    background-color: #ad473f;
+    border-radius: 10px; 
+    margin-left: 10px; 
+    margin-right: 10px;
+}
+
+#btn-off::hover {
+    background-color: #8d362f;
+}

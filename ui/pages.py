@@ -73,7 +73,6 @@ class LogPage:
         self.page.setStyleSheet(styles)
         self.title()
         self.log_area()
-        self.logs()
 
     def title(self):
         self.title = QtWidgets.QLabel(self.page)

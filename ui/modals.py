@@ -1,4 +1,10 @@
+import time
+
 from PyQt5 import QtCore, QtWidgets
+
+from steamlib.client import SteamClient
+from core.db.methods import add_user
+
 
 class AddItemModalWindow(QtWidgets.QMainWindow):
     def setupUi(self):
@@ -25,6 +31,12 @@ class AddItemModalWindow(QtWidgets.QMainWindow):
 
 
 class CodeModalWindow(QtWidgets.QMainWindow):
+    def __init__(self, client, login_modal_window, main_window):
+        super().__init__()
+        self.client = client
+        self.login_modal_window = login_modal_window
+        self.main_window = main_window
+    
     def setupUi(self):
         with open('steam-trade/ui/css/modals.css') as style:
             styles = style.read()
@@ -54,9 +66,27 @@ class CodeModalWindow(QtWidgets.QMainWindow):
         self.code_btn.setGeometry(QtCore.QRect(40, 100, 151, 31))
         self.code_btn.setObjectName('default-btn')
         self.code_btn.setText('OK')
-
+        self.code_btn.clicked.connect(self.send_code)
+        
+        
+    def send_code(self):
+        resp = self.client.login(code=self.code_input.text())
+        cookies = resp.cookies.get_dict()
+        if cookies.get('sessionid', False):
+            add_user(self.client.username, cookies)
+            self.close()
+            time.sleep(.5)
+            self.login_modal_window.close()
+            time.sleep(.5)
+            self.main_window.setupUi()
+            self.main_window.show()
+    
 
 class LoginModalWindow(QtWidgets.QMainWindow):
+    def __init__(self, main_win):
+        super().__init__()
+        self.main_win = main_win
+    
     def setupUi(self):
         with open('steam-trade/ui/css/modals.css') as style:
             styles = style.read()
@@ -79,6 +109,7 @@ class LoginModalWindow(QtWidgets.QMainWindow):
         self.login_input.setObjectName('default-input')
         self.login_input.setPlaceholderText('Login')
         self.password_input = QtWidgets.QLineEdit(self)
+        self.password_input.setEchoMode(QtWidgets.QLineEdit.Password)
         self.password_input.setGeometry(QtCore.QRect(30, 140, 381, 31))
         self.password_input.setPlaceholderText('Password')
         self.password_input.setObjectName("default-input")
@@ -88,7 +119,7 @@ class LoginModalWindow(QtWidgets.QMainWindow):
         self.login_button.setGeometry(QtCore.QRect(140, 190, 151, 31))
         self.login_button.setObjectName('default-btn')
         self.login_button.setText('Login')
-        self.login_button.clicked.connect(self.open_code_window)
+        self.login_button.clicked.connect(self.login)
         
     def title(self):
         self.login_title = QtWidgets.QLabel(self)
@@ -96,12 +127,16 @@ class LoginModalWindow(QtWidgets.QMainWindow):
         self.login_title.setObjectName('login-title')
         self.login_title.setAlignment(QtCore.Qt.AlignCenter)
         self.login_title.setText('LOGIN')
-
-    def open_code_window(self):
-        self.code_window = CodeModalWindow()
-        self.code_window.setupUi()
-        self.code_window.show()
-        
+    
+    def login(self):
+        login = self.login_input.text()
+        password = self.password_input.text()
+        client = SteamClient(login, password)
+        resp = client.login()
+        if resp.get("requires_twofactor", False):
+            self.code_window = CodeModalWindow(client, self, self.main_win)
+            self.code_window.setupUi()
+            self.code_window.show()
 
 
 if __name__ == "__main__":

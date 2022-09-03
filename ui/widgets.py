@@ -4,10 +4,11 @@ from PyQt5 import QtWidgets, QtCore
 
 
 class Sidebar:
-    def __init__(self, parent) -> None:
+    def __init__(self, parent, user) -> None:
         with open('steam-trade/ui/css/sidebar.css') as style:
             styles = style.read()
         self.sidebar = QtWidgets.QWidget(parent)
+        self.user = user
         self.sidebar.setGeometry(QtCore.QRect(0, 0, 181, 721))
         self.sidebar.setObjectName("sidebar")
         self.sidebar.setStyleSheet(styles)
@@ -16,7 +17,6 @@ class Sidebar:
         self.avatar()
         self.username()
 
-    
     def buttons_box(self):
         self.buttons_area = QtWidgets.QFrame(self.sidebar)
         self.buttons_area.setGeometry(QtCore.QRect(0, 60, 181, 191))
@@ -57,7 +57,7 @@ class Sidebar:
         self.username = QtWidgets.QLabel(self.sidebar)
         self.username.setGeometry(QtCore.QRect(60, 680, 67, 17))
         self.username.setObjectName("username")
-        self.username.setText('valex')
+        self.username.setText(self.user.account_name)
     
 
 class QTextEditLogger(logging.Handler):
@@ -69,5 +69,4 @@ class QTextEditLogger(logging.Handler):
     def emit(self, record):
         msg = self.format(record)
         self.widget.appendPlainText(msg)
-
-    
+ 

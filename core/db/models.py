@@ -23,6 +23,7 @@ class User(Base):
     identity_secret = Column(String(30))
     revocation_code = Column(String(10))
     device_id = Column(String(60))
+    is_loggin = Column(Boolean, default=True)
     
     def __str__(self) -> str:
         return f'User: {self.account_name}'
@@ -78,3 +79,11 @@ class Game(Base):
     
     def __str__(self) -> str:
         return f'Game: {self.name}'
+
+
+
+from sqlalchemy import create_engine
+
+engine = create_engine('sqlite:///test.db')
+
+Base.metadata.create_all(engine)

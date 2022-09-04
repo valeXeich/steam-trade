@@ -79,11 +79,3 @@ class Game(Base):
     
     def __str__(self) -> str:
         return f'Game: {self.name}'
-
-
-
-from sqlalchemy import create_engine
-
-engine = create_engine('sqlite:///test.db')
-
-Base.metadata.create_all(engine)

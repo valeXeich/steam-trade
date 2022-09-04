@@ -3,7 +3,7 @@ import time
 from PyQt5 import QtCore, QtWidgets
 
 from steamlib.client import SteamClient
-from core.db.methods import add_user
+from core.db.methods import add_user, add_item
 
 
 class AddItemModalWindow(QtWidgets.QMainWindow):
@@ -22,6 +22,7 @@ class AddItemModalWindow(QtWidgets.QMainWindow):
         self.btn_add.setGeometry(QtCore.QRect(150, 70, 181, 31))
         self.btn_add.setObjectName("default-btn")
         self.btn_add.setText('Add Item')
+        self.btn_add.clicked.connect(self.add_item_to_db)
     
     def input(self):
         self.item_input = QtWidgets.QLineEdit(self)
@@ -29,6 +30,10 @@ class AddItemModalWindow(QtWidgets.QMainWindow):
         self.item_input.setPlaceholderText('URL')
         self.item_input.setObjectName("default-input")
 
+    def add_item_to_db(self):
+        add_item(self.item_input.text())
+        time.sleep(.3)
+        self.close()
 
 class CodeModalWindow(QtWidgets.QMainWindow):
     def __init__(self, client, login_modal_window, main_window):

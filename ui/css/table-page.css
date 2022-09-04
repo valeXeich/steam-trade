@@ -52,3 +52,30 @@ QCheckBox::indicator:unchecked {
 QCheckBox::indicator:checked {
     background-color: rgb(60, 131, 60);
 }
+
+#checkbox {
+    background-color: #1b1c22;
+}
+
+QCheckBox::indicator {
+    width: 15px;
+    height: 5px;
+}
+
+QCheckBox::indicator:unchecked {
+    background-color: #ad473f;
+}
+
+QCheckBox::indicator:checked {
+    background-color: rgb(60, 131, 60);
+}
+
+#delete-btn {
+    color: #acacae; 
+    border: none;
+}
+
+#delete-btn::hover {
+    color: white; 
+    background-color: #ad473f;
+}

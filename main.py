@@ -6,7 +6,7 @@ from ui.widgets import Sidebar
 from ui.pages import TablePage, LogPage, SettingPage
 from ui.modals import LoginModalWindow
 
-from core.db.methods import is_user_login, get_user
+from core.db.methods import is_user_login, get_user, get_items
 
 login = is_user_login()
 
@@ -16,13 +16,14 @@ class MainWindow(QtWidgets.QMainWindow):
         with open('steam-trade/ui/css/main.css') as style:
             styles = style.read()
         self.user = get_user()
+        self.items = get_items()
         self.setObjectName('MainWindow')
         self.resize(1280, 720)
         self.sidebar = Sidebar(self, self.user)
         self.main = QtWidgets.QStackedWidget(self)
         self.main.setGeometry(QtCore.QRect(180, 0, 1121, 720))
         self.main.setObjectName("main")
-        self.table = TablePage()
+        self.table = TablePage(self.items)
         self.logs = LogPage()
         self.settings = SettingPage()
         self.main.addWidget(self.table.page)
@@ -61,12 +62,3 @@ if __name__ == "__main__":
         win.show()
     sys.exit(app.exec_())
     
-    
-    
-    
-    
-    
-    
-    
-    
-    # gJ3T67Hr0OE5FIrxMu3v

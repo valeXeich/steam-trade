@@ -69,4 +69,10 @@ class QTextEditLogger(logging.Handler):
     def emit(self, record):
         msg = self.format(record)
         self.widget.appendPlainText(msg)
+
+
+class ReadOnlyDelegate(QtWidgets.QStyledItemDelegate):
+    def createEditor(self, parent, option, index):
+        # webbrowser.open('www.google.com')
+        return 
  

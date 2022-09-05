@@ -1,9 +1,27 @@
 import logging
+import webbrowser
 
 from PyQt5 import QtWidgets, QtCore
 
 from .widgets import QTextEditLogger, ReadOnlyDelegate
 from .modals import AddItemModalWindow
+from core.db.methods import ( 
+    get_item,
+    delete_item, 
+    delete_items,
+    set_buy_item, 
+    set_buy_items,
+    check_buy_items,
+    set_sell_item,
+    set_sell_items,
+    check_sell_items,
+    set_amount,
+    set_amount_all,
+    set_buy_price,
+    set_buy_price_all,
+    set_sell_price,
+    set_sell_price_all,  
+)
 
 class TablePage:
     def __init__(self, items):
@@ -42,15 +60,45 @@ class TablePage:
         self.table.setColumnWidth(6, 113)
         delegate = ReadOnlyDelegate(self.table)
         self.table.setItemDelegateForColumn(0, delegate)
+          
+    def set_item_value(self, item):
+        row, column = item.row(), item.column()
+        text = self.table.horizontalHeaderItem(column).text().lower()
+        to_change = f'{text}_all' if row == 0 else text
+        
+        item = self.table.item(row, 0).text()
+        value = self.table.item(row, column).text()
+        
+        actions = {
+            'amount': set_amount,
+            'purchase': set_buy_price,
+            'selling': set_sell_price,
+            'amount_all': set_amount_all,
+            'purchase_all': set_buy_price_all,
+            'selling_all': set_sell_price_all
+        } 
+        
+        actions[to_change](value) if row == 0 else actions[to_change](item, value)
+        
+    def set_checkbox_state(self, item):
+        checkbox_buy = getattr(self, f'{item.name}_checkbox_buy')
+        checkbox_sell = getattr(self, f'{item.name}_checkbox_sell')
+        checkbox_buy.clicked.connect(lambda: set_buy_item(item.name))
+        checkbox_buy.setChecked(item.buy_item)
+        checkbox_sell.clicked.connect(lambda: set_sell_item(item.name))
+        checkbox_sell.setChecked(item.sell_item)
     
     def load_items(self):
         row = 1
         self.table.setRowCount(len(self.items) + 1)
         self.action_all()
+        self.table.verticalHeader().setVisible(False)
         for item in self.items:
             widget_buy = QtWidgets.QWidget()
             widget_buy.setObjectName('checkbox')
             checkbox_buy = QtWidgets.QCheckBox()
+            setattr(self, f'{item.name}_checkbox_buy', checkbox_buy)
+            
             layout_buy = QtWidgets.QHBoxLayout(widget_buy)
             layout_buy.addWidget(checkbox_buy)
             layout_buy.setAlignment(QtCore.Qt.AlignCenter)
@@ -58,6 +106,10 @@ class TablePage:
             widget_sell = QtWidgets.QWidget()
             widget_sell.setObjectName('checkbox')
             checkbox_sell = QtWidgets.QCheckBox()
+            setattr(self, f'{item.name}_checkbox_sell', checkbox_sell)
+            
+            self.set_checkbox_state(item)
+            
             layout_sell = QtWidgets.QHBoxLayout(widget_sell)
             layout_sell.addWidget(checkbox_sell)
             layout_sell.setAlignment(QtCore.Qt.AlignCenter)
@@ -65,6 +117,7 @@ class TablePage:
             button_delete = QtWidgets.QPushButton()
             button_delete.setText('Delete')
             button_delete.setObjectName('delete-btn')
+            button_delete.clicked.connect(lambda: delete_item(item.name))
             
             item_name = QtWidgets.QTableWidgetItem(item.name)
 
@@ -83,13 +136,24 @@ class TablePage:
             self.table.setItem(row, 4, purschase)
             self.table.setItem(row, 5, selling)
             self.table.setCellWidget(row, 6, button_delete)
-            self.table.verticalHeader().setVisible(False)
             row += 1
+            
+        self.table.itemChanged.connect(self.set_item_value)
+        self.table.itemDoubleClicked.connect(self.open_url)
+        
+    def open_url(self, item):
+        if item.column() == 0 and item.row() > 0:
+            item = get_item(item.text())
+            webbrowser.open(item.steam_url)
     
     def action_all(self):
         widget_buy = QtWidgets.QWidget()
         widget_buy.setObjectName('checkbox')
         checkbox_buy = QtWidgets.QCheckBox()
+        
+        checkbox_buy.clicked.connect(lambda: set_buy_items(checkbox_buy.isChecked()))
+        checkbox_buy.setChecked(check_buy_items())
+        
         layout_buy = QtWidgets.QHBoxLayout(widget_buy)
         layout_buy.addWidget(checkbox_buy)
         layout_buy.setAlignment(QtCore.Qt.AlignCenter)
@@ -97,6 +161,10 @@ class TablePage:
         widget_sell = QtWidgets.QWidget()
         widget_sell.setObjectName('checkbox')
         checkbox_sell = QtWidgets.QCheckBox()
+        
+        checkbox_sell.clicked.connect(lambda: set_sell_items(checkbox_sell.isChecked()))
+        checkbox_sell.setChecked(check_sell_items())
+        
         layout_sell = QtWidgets.QHBoxLayout(widget_sell)
         layout_sell.addWidget(checkbox_sell)
         layout_sell.setAlignment(QtCore.Qt.AlignCenter)
@@ -104,6 +172,7 @@ class TablePage:
         button_delete = QtWidgets.QPushButton()
         button_delete.setText('Delete')
         button_delete.setObjectName('delete-btn')
+        button_delete.clicked.connect(delete_items)
 
         amount = QtWidgets.QTableWidgetItem('0')
         amount.setTextAlignment(QtCore.Qt.AlignCenter)
@@ -187,3 +256,4 @@ class SettingPage:
         self.title.setGeometry(QtCore.QRect(20, 10, 111, 41))
         self.title.setObjectName("title_setting")
         self.title.setText('Settings')
+        

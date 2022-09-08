@@ -1,6 +1,7 @@
 import requests
 
-from .db.methods import get_user
+from .db.methods import get_user, set_user_avatar
+from .utils import get_avatar_url
 from steamlib.models import APIEndpoint
 
 def do_login():
@@ -38,5 +39,9 @@ def do_login():
                 secure=True,
             )
             session.cookies.set("Steam_Language", "english", domain=domain)
+    
+    avatar_link = get_avatar_url(session)
+    if user.avatar != avatar_link:
+        set_user_avatar(avatar_link) 
         
     return session

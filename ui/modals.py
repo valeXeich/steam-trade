@@ -7,6 +7,10 @@ from core.db.methods import add_user, add_item
 
 
 class AddItemModalWindow(QtWidgets.QMainWindow):
+    def __init__(self, table_page):
+        super().__init__()
+        self.table_page = table_page
+    
     def setupUi(self):
         with open('steam-trade/ui/css/modals.css') as style:
             styles = style.read()
@@ -31,7 +35,10 @@ class AddItemModalWindow(QtWidgets.QMainWindow):
         self.item_input.setObjectName("default-input")
 
     def add_item_to_db(self):
-        add_item(self.item_input.text())
+        item = add_item(self.item_input.text())
+        row = self.table_page.table.rowCount()
+        self.table_page.table.insertRow(row)
+        self.table_page.add_item_to_table(item, row)
         time.sleep(.3)
         self.close()
 
@@ -78,7 +85,7 @@ class CodeModalWindow(QtWidgets.QMainWindow):
         resp = self.client.login(code=self.code_input.text())
         cookies = resp.cookies.get_dict()
         if cookies.get('sessionid', False):
-            add_user(self.client.username, cookies)
+            add_user(self.client.username, self.client._session)
             self.close()
             time.sleep(.5)
             self.login_modal_window.close()

@@ -1,6 +1,7 @@
 import logging
+import requests
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 
 class Sidebar:
@@ -47,11 +48,12 @@ class Sidebar:
         self.start_button.setObjectName('btn-on')
         
     def avatar(self):
-        self.avatar = QtWidgets.QFrame(self.sidebar)
-        self.avatar.setGeometry(QtCore.QRect(10, 669, 41, 41))
-        self.avatar.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.avatar.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.avatar.setObjectName("avatar")
+        self.avatar = QtGui.QImage()
+        self.avatar.loadFromData(requests.get(self.user.avatar).content)
+        self.avatar_lbl = QtWidgets.QLabel(self.sidebar)
+        self.avatar_lbl.setGeometry(QtCore.QRect(10, 669, 41, 41))   
+        self.avatar_lbl.setPixmap(QtGui.QPixmap(self.avatar))
+        self.avatar_lbl.setScaledContents(True)  
     
     def username(self):
         self.username = QtWidgets.QLabel(self.sidebar)
@@ -73,6 +75,5 @@ class QTextEditLogger(logging.Handler):
 
 class ReadOnlyDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
-        # webbrowser.open('www.google.com')
         return 
  

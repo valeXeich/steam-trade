@@ -69,7 +69,7 @@ def delete_item(name):
     
 def delete_items():
     dbsession.query(Item).delete()
-    dbsession.comdbmit()
+    dbsession.commit()
     
 def set_buy_item(name):
     item = dbsession.query(Item).filter(Item.name==name).first()

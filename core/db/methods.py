@@ -1,6 +1,10 @@
 from .db import session
-from .models import User
+from .models import User, Game, Item
 
+# game = session.query(Game).filter(Game.pk == 1).first()
+# item = Item(name='Desert Eagle | Поток информации', steam_url='https://steamcommunity.com/market/listings/730/Desert%20Eagle%20%7C%20Printstream%20%28Factory%20New%29', game=game.pk)
+# session.add(item)
+# session.commit()
 
 def add_user(account_name, cookies):
     user = User(
@@ -27,3 +31,8 @@ def is_user_login():
 def get_user():
     user = session.query(User).filter(User.is_loggin == 1).first()
     return user
+
+def get_items():
+    items = session.query(Item).all()
+    return items
+

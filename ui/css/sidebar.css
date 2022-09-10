@@ -27,12 +27,6 @@ QPushButton#un-active-btn {
     margin-bottom: 5px;
 }
 
-#avatar {
-    background-color: white;
-    border: 1px solid white;
-    border-radius: 19px;
-}
-
 #username {
     color: white;
     font-size: 14px;

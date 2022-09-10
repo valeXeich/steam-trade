@@ -14,16 +14,15 @@ class User(Base):
     account_name = Column(String(50), unique=True, nullable=False)
     avatar = Column(String(255))
     session_id = Column(String(30), nullable=False)
+    
     steam_id = Column(String(20), nullable=False)
     oauth_token = Column(String(35), nullable=False)
-    steam_login = Column(String(70), nullable=False)
-    steam_login_secure = Column(String(70), nullable=False)
-    steam_machine_auth = Column(String(50), nullable=False)
+    
     shared_secret = Column(String(30))
     identity_secret = Column(String(30))
     revocation_code = Column(String(10))
     device_id = Column(String(60))
-    is_loggin = Column(Boolean, default=True)
+    is_login = Column(Boolean, default=True)
     
     def __str__(self) -> str:
         return f'User: {self.account_name}'
@@ -79,11 +78,3 @@ class Game(Base):
     
     def __str__(self) -> str:
         return f'Game: {self.name}'
-
-
-
-from sqlalchemy import create_engine
-
-engine = create_engine('sqlite:///test.db')
-
-Base.metadata.create_all(engine)

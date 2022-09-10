@@ -3,6 +3,8 @@ from steamlib.models import APIEndpoint
 from db.db import session
 from db.models import BuyerToReceive
 from decimal import Decimal
+import urllib
+from bs4 import BeautifulSoup
 
 def get_price(currency, item_name_id, method):
     if method == 'sell':
@@ -39,3 +41,15 @@ def get_buy_order_id(buy_orders, item):
     for order in buy_orders:
         if order['name'] == item.name:
             return order
+
+def parse(url):
+    url = url.split('/')
+    name = urllib.parse.unquote(url[6])
+    game_id = url[5]
+    return name, game_id
+
+def get_avatar_url(session):
+    content = session.get('https://store.steampowered.com/').text
+    soup = BeautifulSoup(content, 'html.parser')
+    link = soup.find('span', {'class': 'pulldown'}).find('img', {'class': 'foryou_avatar'}).attrs['src']
+    return f"{link[:-4].replace('akamai', 'cloudflare')}_full.jpg"

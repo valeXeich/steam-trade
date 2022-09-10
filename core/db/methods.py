@@ -1,38 +1,135 @@
-from .db import session
-from .models import User, Game, Item
+import json
 
-# game = session.query(Game).filter(Game.pk == 1).first()
-# item = Item(name='Desert Eagle | Поток информации', steam_url='https://steamcommunity.com/market/listings/730/Desert%20Eagle%20%7C%20Printstream%20%28Factory%20New%29', game=game.pk)
-# session.add(item)
-# session.commit()
+from core.utils import parse, get_avatar_url
+from .db import dbsession
+from .models import User, Item, Game
 
-def add_user(account_name, cookies):
+def add_user(account_name, session):
+    cookies = session.cookies.get_dict()
     user = User(
         account_name=account_name,
-        avatar='/some/path',
+        avatar=get_avatar_url(session),
         session_id=cookies['sessionid'],
         steam_id=cookies['steam_id'],
         oauth_token=cookies['oauth_token'],
-        steam_login= cookies['steamLogin'],
-        steam_login_secure=cookies['steamLoginSecure'],
-        steam_machine_auth=cookies[f"steamMachineAuth{cookies['steam_id']}"],
         shared_secret='blablabla', 
         identity_secret='blablabla',
         revocation_code='12345',
         device_id=None,
     )
-    session.add(user)
-    session.commit()
+    dbsession.add(user)
+    dbsession.commit()
     
 def is_user_login():
-    user = session.query(User).filter(User.is_loggin == 1)
-    return session.query(User.is_loggin).filter(user.exists()).scalar()
+    user = dbsession.query(User).filter(User.is_login == 1)
+    return dbsession.query(User.is_login).filter(user.exists()).scalar()
 
 def get_user():
-    user = session.query(User).filter(User.is_loggin == 1).first()
+    user = dbsession.query(User).filter(User.is_login == 1).first()
     return user
 
+def set_user_avatar(link):
+    user = dbsession.query(User).filter(User.is_login == 1) .first()
+    user.avatar = link
+    dbsession.commit()
+
+def get_item(name):
+    item = dbsession.query(Item).filter(Item.name==name).first()
+    return item
+
 def get_items():
-    items = session.query(Item).all()
+    items = dbsession.query(Item).all()
     return items
 
+def add_item(url, name=None, game_id=None):
+    if name is None or game_id is None:
+        name, game_id = parse(url)
+    games = {
+        '730': 'CS:GO',
+        '570': 'DOTA2',
+        '440': 'TF2',
+        '753': 'STEAM',
+    }
+    game = dbsession.query(Game).filter(Game.name==games[game_id]).first()
+    item = Item(name=name, steam_url=url, game=game.pk)
+    dbsession.add(item)
+    dbsession.commit()
+    return item
+
+def add_items(path):
+    with open(path) as items_json:
+        items = json.load(items_json)
+    for item in items:
+        add_item(item['url'], name=item['name'], game_id=item['game'])
+        
+def delete_item(name):
+    item = dbsession.query(Item).filter(Item.name==name).first()
+    dbsession.delete(item)
+    dbsession.commit()
+    
+def delete_items():
+    dbsession.query(Item).delete()
+    dbsession.commit()
+    
+def set_buy_item(name):
+    item = dbsession.query(Item).filter(Item.name==name).first()
+    item.buy_item = not item.buy_item
+    dbsession.commit()
+
+def set_buy_items(state):
+    items = dbsession.query(Item).all()
+    for item in items:
+        item.buy_item = True if state else False
+    dbsession.commit()
+    
+def check_buy_items():
+    items = dbsession.query(Item.buy_item).all()
+    return all([item[0] for item in items])
+
+def set_sell_item(name):
+    item = dbsession.query(Item).filter(Item.name==name).first()
+    item.sell_item = not item.sell_item
+    dbsession.commit()
+
+def set_sell_items(state):
+    items = dbsession.query(Item).all()
+    for item in items:
+        item.sell_item = True if state else False
+    dbsession.commit()
+    
+def check_sell_items():
+    items = dbsession.query(Item.sell_item).all()
+    return all([item[0] for item in items])
+
+def set_amount(name, value):
+    item = dbsession.query(Item).filter(Item.name==name).first()
+    item.amount = value
+    dbsession.commit()
+
+def set_amount_all(value):
+    items = dbsession.query(Item).all()
+    for item in items:
+        item.amount = value
+    dbsession.commit()
+    
+def set_buy_price(name, value):
+    item = dbsession.query(Item).filter(Item.name==name).first()
+    item.buy_price = value
+    dbsession.commit()
+
+def set_buy_price_all(value):
+    items = dbsession.query(Item).all()
+    for item in items:
+        item.buy_price = value
+    dbsession.commit()  
+  
+def set_sell_price(name, value):
+    item = dbsession.query(Item).filter(Item.name==name).first()
+    item.sell_price = value
+    dbsession.commit()
+
+def set_sell_price_all(value):
+    items = dbsession.query(Item).all()
+    for item in items:
+        item.sell_price = value
+    dbsession.commit() 

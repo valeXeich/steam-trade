@@ -7,8 +7,7 @@ from ui.pages import TablePage, LogPage, SettingPage
 from ui.modals import LoginModalWindow
 
 from core.db.methods import is_user_login, get_user, get_items
-
-login = is_user_login()
+from core.login import do_login
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -17,6 +16,7 @@ class MainWindow(QtWidgets.QMainWindow):
             styles = style.read()
         self.user = get_user()
         self.items = get_items()
+        self.session = do_login()
         self.setObjectName('MainWindow')
         self.resize(1280, 720)
         self.sidebar = Sidebar(self, self.user)
@@ -31,7 +31,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.main.addWidget(self.logs.page)
         self.main.addWidget(self.settings.page)
         self.page_buttons()
-        
         self.main.setStyleSheet(styles)
     
     def page_buttons(self):
@@ -47,12 +46,11 @@ class MainWindow(QtWidgets.QMainWindow):
             if btn != button:
                 btn.setStyleSheet('color: #acacae; font-size: 14px; border: none; background-color: #25262c')
 
-    
-
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     win = MainWindow()
+    login = is_user_login()
     if not login:
         login_win = LoginModalWindow(win)
         login_win.setupUi()

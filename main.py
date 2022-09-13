@@ -19,7 +19,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.session = do_login()
         self.setObjectName('MainWindow')
         self.resize(1280, 720)
-        self.sidebar = Sidebar(self, self.user)
+        self.sidebar = Sidebar(self, self.user, self.session)
         self.main = QtWidgets.QStackedWidget(self)
         self.main.setGeometry(QtCore.QRect(180, 0, 1121, 720))
         self.main.setObjectName("main")

@@ -171,9 +171,10 @@ class TablePage:
         set_buy_items(state) if column == 'buy' else set_sell_items(state)
         items = get_items()
             
+            
         for item in items:
             checkbox = getattr(self, f'{item.name}_checkbox_{column}')
-            checkbox.setChecked(item.buy_item)
+            checkbox.setChecked(item.buy_item if column == 'buy' else item.sell_item)
         
     def delete_item(self, name):
         row = self.table.currentRow()
@@ -297,8 +298,9 @@ class LogPage:
         self.log_box = QTextEditLogger(self.page)
         self.log_box.setFormatter(logging.Formatter('%(asctime)s - %(message)s', "%H:%M:%S"))
         self.log_box.widget.setGeometry(QtCore.QRect(10, 60, 1071, 631))
+        self.log_box.widget.setStyleSheet('color: red;')
         logging.getLogger().addHandler(self.log_box)
-        logging.getLogger().setLevel(logging.DEBUG)
+        logging.getLogger().setLevel(logging.INFO)
 
 
 class SettingPage:

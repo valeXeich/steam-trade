@@ -1,8 +1,9 @@
 import json
 
+from steamlib.utils import get_item_name_id_by_url
 from core.utils import parse, get_avatar_url
 from .db import dbsession
-from .models import User, Item, Game
+from .models import BuyerToReceive, ItemNameId, User, Item, Game
 
 def add_user(account_name, session):
     cookies = session.cookies.get_dict()
@@ -132,4 +133,51 @@ def set_sell_price_all(value):
     items = dbsession.query(Item).all()
     for item in items:
         item.sell_price = value
-    dbsession.commit() 
+    dbsession.commit()
+
+def load_item_name_id(path):
+    with open(path) as items_json:
+        items = json.load(items_json)
+    for item in items:
+        item_name_id = ItemNameId(name=item, item_nameid=items[item]['item_nameid'])
+        dbsession.add(item_name_id)
+    dbsession.commit()
+
+def load_buyer_to_receive(path):
+    with open(path) as buyer_to_receive_json:
+        buyer_to_receive = json.load(buyer_to_receive_json)
+    for buyer_pays, you_receive in buyer_to_receive.items():
+        obj = BuyerToReceive(buyer_pays=buyer_pays, you_receive=you_receive)
+        dbsession.add(obj)
+    dbsession.commit()
+
+def get_item_nameid(item):
+    item_name_id = dbsession.query(ItemNameId).filter(ItemNameId.name == item.name).first()
+    if item_name_id is None:
+        item_id = get_item_name_id_by_url(item.steam_url)
+        item_name_id = ItemNameId(name=item.name, item_nameid=item_id)
+        dbsession.add(item_name_id)
+        dbsession.commit()
+        return item_name_id.item_nameid
+    return item_name_id.item_nameid
+
+def get_game_by_pk(pk):
+    game = dbsession.query(Game).filter(Game.pk == pk).first()
+    return game
+
+def get_items_sell(analysis=False):
+    items = dbsession.query(Item).filter(Item.sell_item == True, Item.analysis == analysis).all()
+    return items
+
+def get_items_buy(analysis=False):
+    items = dbsession.query(Item).filter(Item.buy_item == True, Item.analysis == analysis).all()
+    return items
+
+def get_you_receive(buyer_pays):
+    price = dbsession.query(BuyerToReceive).filter(BuyerToReceive.buyer_pays == buyer_pays).first()
+    return price.you_receive
+
+def delete_bad_items(items):
+    for item in items:
+        dbsession.delete(item)
+    dbsession.commit()

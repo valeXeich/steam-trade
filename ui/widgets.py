@@ -1,18 +1,21 @@
 import logging
 import requests
-
+from core.launch import Start
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 
 class Sidebar:
-    def __init__(self, parent, user) -> None:
+    test = False
+
+    def __init__(self, parent, user, session) -> None:
         with open('steam-trade/ui/css/sidebar.css') as style:
-            styles = style.read()
+            self.styles = style.read()
         self.sidebar = QtWidgets.QWidget(parent)
+        self.session = session
         self.user = user
         self.sidebar.setGeometry(QtCore.QRect(0, 0, 181, 721))
         self.sidebar.setObjectName("sidebar")
-        self.sidebar.setStyleSheet(styles)
+        self.sidebar.setStyleSheet(self.styles)
         self.buttons_box()
         self.buttons()
         self.avatar()
@@ -46,7 +49,22 @@ class Sidebar:
         self.start_button.setText('ON')
         self.start_button.setGeometry(QtCore.QRect(0, 10, 181, 41))
         self.start_button.setObjectName('btn-on')
+        self.launch = Start(self.session)
+        self.start_button.clicked.connect(self.switch)
         
+    def switch(self):
+        self.test = not self.test
+        if not self.launch.isRunning():
+            self.start_button.setObjectName('btn-off')
+            self.start_button.setText('OFF')
+            self.start_button.setStyleSheet(self.styles)
+            self.launch.start()
+        else:
+            self.start_button.setObjectName('btn-on')
+            self.start_button.setText('ON')
+            self.start_button.setStyleSheet(self.styles)
+            self.launch.stop()
+
     def avatar(self):
         self.avatar = QtGui.QImage()
         self.avatar.loadFromData(requests.get(self.user.avatar).content)
@@ -62,15 +80,20 @@ class Sidebar:
         self.username.setText(self.user.account_name)
     
 
-class QTextEditLogger(logging.Handler):
+class QTextEditLogger(logging.Handler, QtCore.QObject):
+    appendPlainText = QtCore.pyqtSignal(str)
+
     def __init__(self, parent):
         super().__init__()
+        QtCore.QObject.__init__(self)
         self.widget = QtWidgets.QPlainTextEdit(parent)
         self.widget.setReadOnly(True)
+        self.appendPlainText.connect(self.widget.appendPlainText)
+
         
     def emit(self, record):
         msg = self.format(record)
-        self.widget.appendPlainText(msg)
+        self.appendPlainText.emit(msg)
 
 
 class ReadOnlyDelegate(QtWidgets.QStyledItemDelegate):

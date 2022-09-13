@@ -1,15 +1,24 @@
 from steamlib.utils import get_lowest_sell_order, get_highest_buy_order
-from steamlib.models import APIEndpoint
-from db.db import session
-from db.models import BuyerToReceive
+from steamlib.models import Game as GameOptions, APIEndpoint
+from core.db.db import dbsession
+from .db.models import BuyerToReceive, Game
 from decimal import Decimal
 import urllib
 from bs4 import BeautifulSoup
 
+def get_correct_last_sell_order(currency, item_name_id):
+    last_sell_order = get_lowest_sell_order(currency, item_name_id)['full']
+    data = str(last_sell_order).split('.')
+    if len(data[-1]) == 1:
+        last_sell_order = str(last_sell_order) + '0'
+    elif len(data) == 1:
+        last_sell_order = str(last_sell_order) + '.00'
+    return last_sell_order
+
 def get_price(currency, item_name_id, method):
     if method == 'sell':
-        last_sell_order = get_lowest_sell_order(currency, item_name_id)['full']
-        obj = session.query(BuyerToReceive).filter(BuyerToReceive.buyer_pays == last_sell_order).first()
+        last_sell_order = get_correct_last_sell_order(currency, item_name_id)
+        obj = dbsession.query(BuyerToReceive).filter(BuyerToReceive.buyer_pays == last_sell_order).first()
         result = str(round(Decimal(obj.you_receive) - Decimal(0.01), 2)).replace('.', '')
         if result[0] == '0':
             return result[1:]
@@ -21,7 +30,7 @@ def get_price(currency, item_name_id, method):
 def check_quantity(buy_orders, items, cancel_order):
     for order in buy_orders:
         for item in items:
-            if order['name'] == item.name and order['count'] != item.amount:
+            if buy_orders[order]['name'] == item.name and int(buy_orders[order]['count']) != item.amount:
                 cancel_order(order)
 
 def get_two_last_sell_orders(currency ,item_name_id, session):
@@ -39,7 +48,7 @@ def get_two_last_sell_orders(currency ,item_name_id, session):
 
 def get_buy_order_id(buy_orders, item):
     for order in buy_orders:
-        if order['name'] == item.name:
+        if buy_orders[order]['name'] == item.name:
             return order
 
 def parse(url):
@@ -53,3 +62,21 @@ def get_avatar_url(session):
     soup = BeautifulSoup(content, 'html.parser')
     link = soup.find('span', {'class': 'pulldown'}).find('img', {'class': 'foryou_avatar'}).attrs['src']
     return f"{link[:-4].replace('akamai', 'cloudflare')}_full.jpg"
+
+def get_game_by_id(game_pk):
+    game = dbsession.query(Game).filter(Game.pk == game_pk).first()
+    games = {
+        'CS:GO': GameOptions.CSGO,
+        'DOTA2': GameOptions.DOTA2,
+        'TF2': GameOptions.TF2
+    }
+    return games[game.name]
+
+def item_in_orders(buy_orders, item):
+    for order in buy_orders:
+        if buy_orders[order]['name'] == item.name:
+            return True
+    return False
+
+def convert_to_penny(price):
+    return str(int(float(price) * 100)).replace('.', '')

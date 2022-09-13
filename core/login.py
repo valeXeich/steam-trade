@@ -10,6 +10,7 @@ def do_login():
     
     session.cookies.set('browserid', '2468557265578949863')
     session.cookies.set('steamCountry', 'UA%7C24ba0127cdbd4c2483e3e9b1bf881645')
+    session.cookies.set('steam_id', user.steam_id)
     
     data = {"access_token": user.oauth_token}
     

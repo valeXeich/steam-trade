@@ -7,7 +7,6 @@ from .utils import get_game_by_id, get_price, check_quantity, get_two_last_sell_
 
 
 class Market(SteamMarket):
-    stop = False
 
     def get_inventories(self):
         inventories = {
@@ -29,8 +28,6 @@ class Market(SteamMarket):
         inventories = self.get_inventories()
         items = get_items_sell(analysis=True)
         for item in items:
-            if self.stop is True:
-                break
             asset_id = self.get_asset_id(item, inventories, assets)
             if asset_id is None:
                 continue
@@ -45,8 +42,6 @@ class Market(SteamMarket):
         items = get_items_buy(analysis=True)
         check_quantity(buy_orders, items, self.cancel_buy_order)
         for item in items:
-            if self.stop is True:
-                break
             if not item_in_orders(buy_orders, item):
                 item_name_id = get_item_nameid(item)
                 price = get_price(currency, item_name_id, 'buy')

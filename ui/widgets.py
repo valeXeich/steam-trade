@@ -3,16 +3,18 @@ import requests
 from core.launch import Start
 from PyQt5 import QtWidgets, QtCore, QtGui
 
+from core.guard import SteamGuardTimer
+
 
 class Sidebar:
-    test = False
-
-    def __init__(self, parent, user, session) -> None:
+    
+    def __init__(self, parent, user, session, guard) -> None:
         with open('steam-trade/ui/css/sidebar.css') as style:
             self.styles = style.read()
         self.sidebar = QtWidgets.QWidget(parent)
         self.session = session
         self.user = user
+        self.guard = guard
         self.sidebar.setGeometry(QtCore.QRect(0, 0, 181, 721))
         self.sidebar.setObjectName("sidebar")
         self.sidebar.setStyleSheet(self.styles)
@@ -20,6 +22,8 @@ class Sidebar:
         self.buttons()
         self.avatar()
         self.username()
+        if self.user.shared_secret:
+            self.steam_guard_code()
 
     def buttons_box(self):
         self.buttons_area = QtWidgets.QFrame(self.sidebar)
@@ -53,7 +57,6 @@ class Sidebar:
         self.start_button.clicked.connect(self.switch)
         
     def switch(self):
-        self.test = not self.test
         if not self.launch.isRunning():
             self.start_button.setObjectName('btn-off')
             self.start_button.setText('OFF')
@@ -78,7 +81,32 @@ class Sidebar:
         self.username.setGeometry(QtCore.QRect(60, 680, 67, 17))
         self.username.setObjectName("username")
         self.username.setText(self.user.account_name)
-    
+        
+    def steam_guard_code(self):
+        self.code = QtWidgets.QLabel(self.sidebar)
+        self.code.setGeometry(QtCore.QRect(70, 600, 181, 41))
+        self.code.setObjectName('code')
+        self.code.setText(self.guard.get_code())
+        self.code.mouseDoubleClickEvent = self.copy_code_to_clipboard
+        
+        self.pbar = QtWidgets.QProgressBar(self.sidebar)
+        self.pbar.setGeometry(QtCore.QRect(10, 640, 161, 10))
+        self.pbar.setMaximum(30)
+        self.pbar.setTextVisible(False)
+
+        self.code_timer = SteamGuardTimer(self.guard)
+        self.code_timer.counter.connect(self.code_timer_change)
+        self.code_timer.start()
+               
+    def copy_code_to_clipboard(self, event):
+        clipboard = QtWidgets.QApplication.clipboard()
+        clipboard.setText(self.code.text())
+        
+    def code_timer_change(self, value):
+        self.pbar.setValue(value)
+        if value == 0:
+            self.code.setText(self.guard.get_code())
+
 
 class QTextEditLogger(logging.Handler, QtCore.QObject):
     appendPlainText = QtCore.pyqtSignal(str)

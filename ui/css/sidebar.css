@@ -27,7 +27,7 @@ QPushButton#un-active-btn {
     margin-bottom: 5px;
 }
 
-#username {
+#username, #code{
     color: white;
     font-size: 14px;
 }
@@ -54,4 +54,12 @@ QPushButton#un-active-btn {
 
 #btn-off::hover {
     background-color: #8d362f;
+}
+
+QProgressBar {
+    border: none;
+} 
+
+QProgressBar::chunk {
+    background-color: #3c50fa;
 }

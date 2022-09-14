@@ -13,10 +13,6 @@ def add_user(account_name, session):
         session_id=cookies['sessionid'],
         steam_id=cookies['steam_id'],
         oauth_token=cookies['oauth_token'],
-        shared_secret='blablabla', 
-        identity_secret='blablabla',
-        revocation_code='12345',
-        device_id=None,
     )
     dbsession.add(user)
     dbsession.commit()

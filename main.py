@@ -9,6 +9,8 @@ from ui.modals import LoginModalWindow
 from core.db.methods import is_user_login, get_user, get_items
 from core.login import do_login
 
+from core.utils import get_secrets
+from steamlib.guard import SteamGuard
 
 class MainWindow(QtWidgets.QMainWindow):
     def setupUi(self):
@@ -17,9 +19,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.user = get_user()
         self.items = get_items()
         self.session = do_login()
+        self.guard = SteamGuard(self.session, get_secrets(self.user))
         self.setObjectName('MainWindow')
         self.resize(1280, 720)
-        self.sidebar = Sidebar(self, self.user, self.session)
+        self.sidebar = Sidebar(self, self.user, self.session, self.guard)
         self.main = QtWidgets.QStackedWidget(self)
         self.main.setGeometry(QtCore.QRect(180, 0, 1121, 720))
         self.main.setObjectName("main")
@@ -44,8 +47,7 @@ class MainWindow(QtWidgets.QMainWindow):
         button.setStyleSheet('background-color: #1b1c22;')
         for btn in buttons:
             if btn != button:
-                btn.setStyleSheet('color: #acacae; font-size: 14px; border: none; background-color: #25262c')
-
+                btn.setStyleSheet('QPushButton {color: #acacae; font-size: 14px; border: none; background-color: #25262c} QPushButton::hover {background-color: #1b1c22;}')
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

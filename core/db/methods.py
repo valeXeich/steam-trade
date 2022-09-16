@@ -5,7 +5,7 @@ from core.utils import parse, get_avatar_url
 from .db import dbsession
 from .models import BuyerToReceive, ItemNameId, User, Item, Game
 
-def add_user(account_name, session):
+def add_user(account_name, session, is_login=True):
     cookies = session.cookies.get_dict()
     user = User(
         account_name=account_name,
@@ -13,17 +13,37 @@ def add_user(account_name, session):
         session_id=cookies['sessionid'],
         steam_id=cookies['steam_id'],
         oauth_token=cookies['oauth_token'],
+        is_login=is_login
     )
     dbsession.add(user)
     dbsession.commit()
     
 def is_user_login():
-    user = dbsession.query(User).filter(User.is_login == 1)
-    return dbsession.query(User.is_login).filter(user.exists()).scalar()
+    user = dbsession.query(User).filter(User.is_login == 1).first()
+    return True if user is not None else False
 
 def get_user():
     user = dbsession.query(User).filter(User.is_login == 1).first()
     return user
+
+def get_users():
+    users = dbsession.query(User).all()
+    return users
+
+def get_last_added_user():
+    user = dbsession.query(User).order_by(User.pk.desc()).first()
+    return user
+
+def delete_user(user):
+    dbsession.delete(user)
+    dbsession.commit()
+
+def change_user(changed_account):
+    current_user = get_user()
+    current_user.is_login = False
+    changed_account.is_login = True
+    dbsession.commit()
+
 
 def set_user_avatar(link):
     user = dbsession.query(User).filter(User.is_login == 1) .first()

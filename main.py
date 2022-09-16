@@ -11,6 +11,14 @@ from core.login import do_login
 
 from core.utils import get_secrets
 from steamlib.guard import SteamGuard
+from core.db.db import dbsession
+from core.db.models import User
+
+# user = User(account_name='eblan2', avatar='https://avatars.cloudflare.steamstatic.com/7190e53762e093b93291f634668565880849f0bc_full.jpg', steam_id='123', oauth_token='123', session_id='123', is_login=False)
+# dbsession.add(user)
+# dbsession.commit()
+
+
 
 class MainWindow(QtWidgets.QMainWindow):
     def setupUi(self):
@@ -48,6 +56,13 @@ class MainWindow(QtWidgets.QMainWindow):
         for btn in buttons:
             if btn != button:
                 btn.setStyleSheet('QPushButton {color: #acacae; font-size: 14px; border: none; background-color: #25262c} QPushButton::hover {background-color: #1b1c22;}')
+
+    def restart(self):
+        QtCore.QCoreApplication.quit()
+        QtCore.QProcess.startDetached(sys.executable, sys.argv)
+    
+    def closeEvent(self, event):
+        QtWidgets.QApplication.closeAllWindows()
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

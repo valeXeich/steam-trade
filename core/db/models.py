@@ -22,7 +22,7 @@ class User(Base):
     identity_secret = Column(String(30))
     revocation_code = Column(String(10))
     device_id = Column(String(60))
-    is_login = Column(Boolean, default=True)
+    is_login = Column(Boolean, default=False)
     
     def __str__(self) -> str:
         return f'User: {self.account_name}'

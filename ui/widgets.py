@@ -4,6 +4,7 @@ from core.launch import Start
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from core.guard import SteamGuardTimer
+from .modals import AccountSelectModalWindow
 
 
 class Sidebar:
@@ -11,7 +12,8 @@ class Sidebar:
     def __init__(self, parent, user, session, guard) -> None:
         with open('steam-trade/ui/css/sidebar.css') as style:
             self.styles = style.read()
-        self.sidebar = QtWidgets.QWidget(parent)
+        self.parent = parent
+        self.sidebar = QtWidgets.QWidget(self.parent)
         self.session = session
         self.user = user
         self.guard = guard
@@ -77,10 +79,21 @@ class Sidebar:
         self.avatar_lbl.setScaledContents(True)  
     
     def username(self):
-        self.username = QtWidgets.QLabel(self.sidebar)
-        self.username.setGeometry(QtCore.QRect(60, 680, 67, 17))
-        self.username.setObjectName("username")
+        self.username = QtWidgets.QPushButton(self.sidebar)
+        self.username.setGeometry(QtCore.QRect(60, 675, 70, 30))
         self.username.setText(self.user.account_name)
+        self.username.setStyleSheet('QPushButton {border: 1px solid #25262c; background-color: #25262c; font-size: 14; color: white; padding: 5px; border-radius: 4px;} QPushButton::hover {background-color: #60626e}')
+        self.username.clicked.connect(self.select_account)
+
+        # self.username = QtWidgets.QLabel(self.sidebar)
+        # self.username.setGeometry(QtCore.QRect(60, 680, 67, 17))
+        # self.username.setObjectName("username")
+        # self.username.setText(self.user.account_name)
+    
+    def select_account(self):
+        self.account_select = AccountSelectModalWindow(self.parent.restart)
+        self.account_select.setupUi()
+        self.account_select.show()
         
     def steam_guard_code(self):
         self.code = QtWidgets.QLabel(self.sidebar)

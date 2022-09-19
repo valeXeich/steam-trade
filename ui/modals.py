@@ -4,8 +4,13 @@ import sip
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 from steamlib.client import SteamClient
+from steamlib.exceptions import InvalidDataError
+from steamlib.models import APIEndpoint
 from core.db.methods import add_user, add_item, get_users, delete_user, change_user, get_last_added_user
 import requests
+
+from sqlalchemy.exc import IntegrityError, PendingRollbackError
+
 
 class AddItemModalWindow(QtWidgets.QMainWindow):
     def __init__(self, table_page):
@@ -20,7 +25,8 @@ class AddItemModalWindow(QtWidgets.QMainWindow):
         self.setStyleSheet(styles)
         self.resize(488, 121)
         self.button()
-        self.input()
+        self.inputs()
+        self.error_message()
     
     def button(self):
         self.btn_add = QtWidgets.QPushButton(self)
@@ -29,26 +35,50 @@ class AddItemModalWindow(QtWidgets.QMainWindow):
         self.btn_add.setText('Add Item')
         self.btn_add.clicked.connect(self.add_item_to_db)
     
-    def input(self):
+    def inputs(self):
         self.item_input = QtWidgets.QLineEdit(self)
         self.item_input.setGeometry(QtCore.QRect(20, 20, 451, 31))
         self.item_input.setPlaceholderText('URL')
         self.item_input.setObjectName("default-input")
 
+    def error_message(self):
+        self.url_error_message = QtWidgets.QLabel(self)
+        self.url_error_message.setGeometry(QtCore.QRect(20, 105, 451, 31))
+        self.url_error_message.setObjectName('error-message')
+    
     def add_item_to_db(self):
-        item = add_item(self.item_input.text())
-        row = self.table_page.table.rowCount()
-        self.table_page.table.insertRow(row)
-        self.table_page.add_item_to_table(item, row)
-        time.sleep(.3)
-        self.close()
+        item = self.validate_url()
+        
+        if not isinstance(item, bool):
+            row = self.table_page.table.rowCount()
+            self.table_page.table.insertRow(row)
+            self.table_page.add_item_to_table(item, row)
+            time.sleep(.3)
+            self.close()
+    
+    def validate_url(self):
+        try:
+            item = add_item(self.item_input.text())
+        except (KeyError, IndexError):
+            self.item_input.clear()
+            self.resize(488, 141)
+            self.url_error_message.setText("Bad url (Invalid item url or game doesn't exist in the database).")
+            return False
+        except (IntegrityError, PendingRollbackError):
+            self.item_input.clear()
+            self.resize(488, 141)
+            self.url_error_message.setText('This item is already in the database.')
+            return False
+        return item
+
 
 class CodeModalWindow(QtWidgets.QMainWindow):
-    def __init__(self, client, login_modal_window, main_window=None):
+    def __init__(self, client, login_modal_window, main_window=None, is_email_need=False):
         super().__init__()
         self.client = client
         self.login_modal_window = login_modal_window
         self.main_window = main_window
+        self.email = is_email_need
     
     def setupUi(self):
         with open('steam-trade/ui/css/modals.css') as style:
@@ -58,8 +88,9 @@ class CodeModalWindow(QtWidgets.QMainWindow):
         self.setStyleSheet(styles)
         self.resize(223, 152)
         self.title()
-        self.input()
+        self.inputs()
         self.button()
+        self.error_message()
         
     def title(self):
         self.code_title = QtWidgets.QLabel(self)
@@ -68,7 +99,7 @@ class CodeModalWindow(QtWidgets.QMainWindow):
         self.code_title.setObjectName('code-title')
         self.code_title.setText('Enter your code')
         
-    def input(self):
+    def inputs(self):
         self.code_input = QtWidgets.QLineEdit(self)
         self.code_input.setGeometry(QtCore.QRect(10, 50, 201, 31))
         self.code_input.setObjectName('default-input')
@@ -81,35 +112,61 @@ class CodeModalWindow(QtWidgets.QMainWindow):
         self.code_btn.setText('OK')
         self.code_btn.clicked.connect(self.send_code)
         
-    def send_code(self):
-        resp = self.client.login(code=self.code_input.text())
-        cookies = resp.cookies.get_dict()
-        if cookies.get('sessionid', False):
-            add_user(self.client.username, self.client._session)
-            self.close()
-            time.sleep(.5)
-            self.login_modal_window.close()
-            time.sleep(.5)
-            self.main_window.setupUi()
-            self.main_window.show()
+    def error_message(self):
+        self.invalid_code_message = QtWidgets.QLabel(self)
+        self.invalid_code_message.setGeometry(QtCore.QRect(10, 140, 201, 31))
+        self.invalid_code_message.setObjectName('error-message')
         
+    def send_code(self, session, need_code=True):
+        resp = self.get_response(session, need_code)
+        
+        if isinstance(resp, dict) and not resp['success']:
+            self.resize(223, 180)
+            self.invalid_code_message.setText('Invalid code.')
+        else:
+            cookies = resp.cookies.get_dict()
+            if cookies.get('sessionid', False):
+                add_user(self.client.username, self.client._session)
+                self.close()
+                time.sleep(.5)
+                self.login_modal_window.close()
+                time.sleep(.5)
+                self.main_window.setupUi()
+                self.main_window.show()
+
+    def get_response(self, session, need_code):
+        if need_code:
+            if self.email:
+                response = self.client.login(email_code=self.code_input.text())
+            else:
+                response = self.client.login(twofactor_code=self.code_input.text())
+        else:
+            response = session
+        return response
+
 
 class SelectAccountCodeModalWindow(CodeModalWindow):
-    def __init__(self, client, login_modal_window, account_modal):
-        super().__init__(client, login_modal_window)
+    def __init__(self, client, login_modal_window, account_modal, is_email_need=False):
+        super().__init__(client, login_modal_window, is_email_need)
         self.account_modal = account_modal
-        
-    def send_code(self):
-        resp = self.client.login(code=self.code_input.text())
-        cookies = resp.cookies.get_dict()
-        if cookies.get('sessionid', False):
-            add_user(self.client.username, self.client._session, False)
-            self.close()
-            time.sleep(.5)
-            self.login_modal_window.close()
-            user = get_last_added_user()
-            self.account_modal.create_frame(user)
-            self.account_modal.set_geometry()
+        self.email = is_email_need
+    
+    def send_code(self, session, need_code=True):
+        resp = self.get_response(session, need_code)
+            
+        if isinstance(resp, dict) and not resp['success']:
+            self.resize(223, 180)
+            self.invalid_code_message.setText('Invalid code.')
+        else:
+            cookies = resp.cookies.get_dict()
+            if cookies.get('sessionid', False):
+                add_user(self.client.username, self.client._session, False)
+                self.close()
+                time.sleep(.5)
+                self.login_modal_window.close()
+                user = get_last_added_user()
+                self.account_modal.create_frame(user)
+                self.account_modal.set_geometry()
 
 
 class LoginModalWindow(QtWidgets.QMainWindow):
@@ -118,6 +175,7 @@ class LoginModalWindow(QtWidgets.QMainWindow):
         self.main_win = main_win
         self.account_select = account_select
         self.account_modal = account_modal
+        self.captcha_data = {'captcha_gid': '', 'captcha_text': ''}
     
     def setupUi(self):
         with open('steam-trade/ui/css/modals.css') as style:
@@ -131,9 +189,17 @@ class LoginModalWindow(QtWidgets.QMainWindow):
         self.setSizePolicy(self.policy)
         self.setWindowTitle('Login')
         self.setStyleSheet(styles)
+        self.center()
         self.title()
         self.inputs()
         self.button()
+        self.error_messages()
+
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QtWidgets.QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
 
     def inputs(self):
         self.login_input = QtWidgets.QLineEdit(self)
@@ -145,6 +211,11 @@ class LoginModalWindow(QtWidgets.QMainWindow):
         self.password_input.setGeometry(QtCore.QRect(30, 140, 381, 31))
         self.password_input.setPlaceholderText('Password')
         self.password_input.setObjectName("default-input")
+        
+        self.captcha_input = QtWidgets.QLineEdit(self)
+        self.captcha_input.setGeometry(QtCore.QRect(30, 330, 381, 31))
+        self.captcha_input.setObjectName("default-input")
+        self.captcha_input.setPlaceholderText('Captcha')
 
     def button(self):
         self.login_button = QtWidgets.QPushButton(self)
@@ -160,18 +231,68 @@ class LoginModalWindow(QtWidgets.QMainWindow):
         self.login_title.setAlignment(QtCore.Qt.AlignCenter)
         self.login_title.setText('LOGIN')
     
+    def error_messages(self):
+        self.login_error_message = QtWidgets.QLabel(self)
+        self.login_error_message.setGeometry(QtCore.QRect(30, 240, 381, 35))
+        self.login_error_message.setWordWrap(True)
+        self.login_error_message.setObjectName('error-message')
+        
+        self.captcha_image = QtWidgets.QLabel(self)
+        self.captcha_image.setGeometry(QtCore.QRect(30, 280, 206, 40))
+        self.captcha_image.setScaledContents(True)
+    
     def login(self):
         login = self.login_input.text()
         password = self.password_input.text()
         client = SteamClient(login, password)
-        resp = client.login()
-        if resp.get("requires_twofactor", False):
+        self.captcha_data['captcha_text'] = self.captcha_input.text()
+        self.captcha_input.clear()
+        
+        try:
+            resp = client.login(captcha=self.captcha_data)
+        except InvalidDataError:
+            resp = {'message': "The account name or password that you have entered is incorrect."}
+        
+        if isinstance(resp, requests.Session):
             if self.account_select:
-                self.code_window = SelectAccountCodeModalWindow(client, self, self.account_modal)
+                SelectAccountCodeModalWindow(client, self, self.account_modal).send_code(resp, need_code=False)
             else:
-                self.code_window = CodeModalWindow(client, self, self.main_win)
+                CodeModalWindow(client, self, self.main_win).send_code(resp, need_code=False)
+            return
+                
+        if "account name or password" in resp.get("message", ""):
+            self.login_error_message.setText(resp.get("message", ""))
+            self.resize(441, 300)
+            self.password_input.clear()
+            self.captcha_input.deleteLater()
+            self.captcha_image.clear()
+            
+        if "too many login failures" in resp.get("message", ""):
+            self.password_input.clear()
+            self.login_error_message.setText(resp.get("message", ""))
+            self.resize(441, 300) 
+            self.captcha_input.deleteLater()
+            self.captcha_image.clear()
+            
+        if resp.get("captcha_needed", False) and 'too many login failures' not in resp.get("message", ""):
+            self.password_input.clear()
+            self.login_error_message.setText(resp.get("message", ""))
+            self.resize(441, 370)
+            self.captcha = QtGui.QImage()
+            captcha_gid = resp.get("captcha_gid")
+            self.captcha.loadFromData(requests.get(f'{APIEndpoint.COMMUNITY_URL}login/rendercaptcha/?gid={captcha_gid}').content) 
+            self.captcha_image.setPixmap(QtGui.QPixmap(self.captcha))
+            self.captcha_data['captcha_gid'] = captcha_gid
+        
+        if resp.get("requires_twofactor", False) or resp.get("emailauth_needed", False):
+            email = resp.get("emailauth_needed", False)
+            if self.account_select:
+                self.code_window = SelectAccountCodeModalWindow(client, self, self.account_modal, is_email_need=email)
+            else:
+                self.code_window = CodeModalWindow(client, self, self.main_win, is_email_need=email)
             self.code_window.setupUi()
             self.code_window.show()
+
 
 class AccountSelectModalWindow(QtWidgets.QMainWindow):
     def __init__(self, restart):
@@ -322,14 +443,3 @@ class AccountSelectModalWindow(QtWidgets.QMainWindow):
         self.login_window = LoginModalWindow(account_select=True, account_modal=self)
         self.login_window.setupUi()
         self.login_window.show()
-
-
-
-
-# if __name__ == "__main__":
-#     import sys
-#     app = QtWidgets.QApplication(sys.argv)
-#     login_form = AccountSelectModalWindow()
-#     login_form.setupUi()
-#     login_form.show()
-#     sys.exit(app.exec_())

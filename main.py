@@ -11,13 +11,6 @@ from core.login import do_login
 
 from core.utils import get_secrets
 from steamlib.guard import SteamGuard
-from core.db.db import dbsession
-from core.db.models import User
-
-# user = User(account_name='eblan2', avatar='https://avatars.cloudflare.steamstatic.com/7190e53762e093b93291f634668565880849f0bc_full.jpg', steam_id='123', oauth_token='123', session_id='123', is_login=False)
-# dbsession.add(user)
-# dbsession.commit()
-
 
 
 class MainWindow(QtWidgets.QMainWindow):

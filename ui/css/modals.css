@@ -28,3 +28,8 @@
 #AddItemModal, #Login, #Code {
     background-color: #1b1c22;
 }
+
+#error-message {
+    color: #ff605c; 
+    font-size: 14px;
+}

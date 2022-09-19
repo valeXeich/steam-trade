@@ -60,7 +60,10 @@ def parse(url):
 def get_avatar_url(session):
     content = session.get('https://store.steampowered.com/').text
     soup = BeautifulSoup(content, 'html.parser')
-    link = soup.find('span', {'class': 'pulldown'}).find('img', {'class': 'foryou_avatar'}).attrs['src']
+    try:
+        link = soup.find('span', {'class': 'pulldown'}).find('img', {'class': 'foryou_avatar'}).attrs['src']
+    except AttributeError:
+        return 'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/b5/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg' 
     return f"{link[:-4].replace('akamai', 'cloudflare')}_full.jpg"
 
 def get_game_by_id(game_pk):

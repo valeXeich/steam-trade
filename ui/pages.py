@@ -1,6 +1,7 @@
 import logging
 import webbrowser
 import os
+import json
 
 from PyQt5 import QtWidgets, QtCore
 
@@ -171,7 +172,6 @@ class TablePage:
         set_buy_items(state) if column == 'buy' else set_sell_items(state)
         items = get_items()
             
-            
         for item in items:
             checkbox = getattr(self, f'{item.name}_checkbox_{column}')
             checkbox.setChecked(item.buy_item if column == 'buy' else item.sell_item)
@@ -262,7 +262,7 @@ class TablePage:
             'JSON document (*.json)'
         )[0]
         
-        if path_to_json_file != '':
+        if path_to_json_file != '' and self.validate_items_file(path_to_json_file):
             delete_items()
             self.table.setRowCount(1)
             add_items(path_to_json_file)
@@ -271,7 +271,17 @@ class TablePage:
                 row = self.table.rowCount()
                 self.table.insertRow(row)
                 self.add_item_to_table(item, row)
+    
+    def validate_items_file(self, path):
+        with open(path) as items_json:
+            items = json.load(items_json)
         
+        for item in items:
+            if len(item) != 3 or list(item.keys()) != ['name', 'game', 'url']:
+                return False 
+            
+        return True
+    
     def open_add_item_window(self):
         self.window_add_item = AddItemModalWindow(self)
         self.window_add_item.setupUi()

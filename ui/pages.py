@@ -3,7 +3,7 @@ import webbrowser
 import os
 import json
 
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 
 from .widgets import QTextEditLogger, ReadOnlyDelegate
 from .modals import AddItemModalWindow
@@ -297,6 +297,7 @@ class LogPage:
         self.page.setStyleSheet(styles)
         self.title()
         self.log_area()
+        self.buttons()
 
     def title(self):
         self.title = QtWidgets.QLabel(self.page)
@@ -304,14 +305,20 @@ class LogPage:
         self.title.setObjectName("title_log")
         self.title.setText('Logs')
 
+    def buttons(self):
+        self.clear_btn = QtWidgets.QPushButton(self.page)
+        self.clear_btn.setGeometry(QtCore.QRect(10, 675, 1071, 30))
+        self.clear_btn.setText('Clear')
+        self.clear_btn.setObjectName('clear-btn')
+        self.clear_btn.clicked.connect(self.log_box.log_widget.clear)
+    
     def log_area(self):
         self.log_box = QTextEditLogger(self.page)
         self.log_box.setFormatter(logging.Formatter('%(asctime)s - %(message)s', "%H:%M:%S"))
-        self.log_box.widget.setGeometry(QtCore.QRect(10, 60, 1071, 631))
-        self.log_box.widget.setStyleSheet('color: red;')
+        self.log_box.log_widget.setGeometry(QtCore.QRect(10, 60, 1071, 600))
         logging.getLogger().addHandler(self.log_box)
         logging.getLogger().setLevel(logging.INFO)
-
+    
 
 class SettingPage:
     def __init__(self) -> None:

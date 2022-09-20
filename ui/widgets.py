@@ -122,14 +122,20 @@ class QTextEditLogger(logging.Handler, QtCore.QObject):
     def __init__(self, parent):
         super().__init__()
         QtCore.QObject.__init__(self)
-        self.widget = QtWidgets.QPlainTextEdit(parent)
-        self.widget.setReadOnly(True)
-        self.appendPlainText.connect(self.widget.appendPlainText)
-
+        self.log_widget = QtWidgets.QTextEdit(parent)
+        self.log_widget.setReadOnly(True)
+        self.appendPlainText.connect(self.add_log_to_widget)
         
     def emit(self, record):
         msg = self.format(record)
         self.appendPlainText.emit(msg)
+        
+    def add_log_to_widget(self, value):
+        if 'order' in value:
+            self.log_widget.setTextColor(QtGui.QColor(59, 165, 93))
+        if 'sale' in value:
+            self.log_widget.setTextColor(QtGui.QColor(36, 138, 211))
+        self.log_widget.append(value)
 
 
 class ReadOnlyDelegate(QtWidgets.QStyledItemDelegate):

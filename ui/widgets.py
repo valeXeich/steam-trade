@@ -80,10 +80,23 @@ class Sidebar:
     
     def username(self):
         self.username = QtWidgets.QPushButton(self.sidebar)
-        self.username.setGeometry(QtCore.QRect(60, 675, 70, 30))
-        self.username.setText(self.user.account_name)
+        width = self.username_width
+        account_name = f'{self.user.account_name[:7]}...' if width == 112 else self.user.account_name
+        self.username.setGeometry(QtCore.QRect(60, 675, width, 30))
+        self.username.setText(account_name)
         self.username.setStyleSheet('QPushButton {border: 1px solid #25262c; background-color: #25262c; font-size: 14; color: white; padding: 5px; border-radius: 4px;} QPushButton::hover {background-color: #60626e}')
         self.username.clicked.connect(self.select_account)
+
+    @property
+    def username_width(self):
+        min_width = 74
+        max_width = 112
+        login_width = self.username.fontMetrics().boundingRect(self.user.account_name).width() + 10
+        
+        if min_width < login_width < max_width:
+            return login_width
+
+        return min_width if login_width <= min_width else max_width
 
     def select_account(self):
         self.account_select = AccountSelectModalWindow(self.parent.restart)

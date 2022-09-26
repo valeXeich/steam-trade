@@ -39,7 +39,21 @@ class TablePage:
         self.table_widget()
         self.buttons_box()
         self.load_items()
+        self.inputs()
 
+    def inputs(self):
+        self.search_input = QtWidgets.QLineEdit(self.page)
+        self.search_input.setGeometry(QtCore.QRect(881, 15, 200, 31))
+        self.search_input.setPlaceholderText('Search')
+        self.search_input.setObjectName('default-input')
+        self.search_input.textChanged.connect(self.search)
+        
+    def search(self):
+        name = self.search_input.text().lower()
+        for row in range(1, self.table.rowCount()):
+            item = self.table.item(row, 0)
+            self.table.setRowHidden(row, name not in item.text().lower())
+        
     def title(self):
         self.title = QtWidgets.QLabel(self.page)
         self.title.setGeometry(QtCore.QRect(20, 10, 111, 41))

@@ -9,8 +9,6 @@ from steamlib.models import APIEndpoint
 from core.db.methods import add_user, add_item, get_users, delete_user, change_user, get_last_added_user
 import requests
 
-from sqlalchemy.exc import IntegrityError, PendingRollbackError
-
 
 class AddItemModalWindow(QtWidgets.QMainWindow):
     def __init__(self, table_page):
@@ -23,10 +21,17 @@ class AddItemModalWindow(QtWidgets.QMainWindow):
         self.setObjectName('AddItemModal')
         self.setWindowTitle('Add Item')
         self.setStyleSheet(styles)
-        self.resize(488, 121)
+        self.setFixedSize(488, 121)
         self.button()
         self.inputs()
         self.error_message()
+        self.center()
+        
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QtWidgets.QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
     
     def button(self):
         self.btn_add = QtWidgets.QPushButton(self)
@@ -43,8 +48,9 @@ class AddItemModalWindow(QtWidgets.QMainWindow):
 
     def error_message(self):
         self.url_error_message = QtWidgets.QLabel(self)
-        self.url_error_message.setGeometry(QtCore.QRect(20, 105, 451, 31))
+        self.url_error_message.setGeometry(QtCore.QRect(20, 115, 451, 31))
         self.url_error_message.setObjectName('error-message')
+        self.url_error_message.setWordWrap(True)
     
     def add_item_to_db(self):
         item = self.validate_url()
@@ -61,13 +67,8 @@ class AddItemModalWindow(QtWidgets.QMainWindow):
             item = add_item(self.item_input.text())
         except (KeyError, IndexError):
             self.item_input.clear()
-            self.resize(488, 141)
-            self.url_error_message.setText("Bad url (Invalid item url or game doesn't exist in the database).")
-            return False
-        except (IntegrityError, PendingRollbackError):
-            self.item_input.clear()
-            self.resize(488, 141)
-            self.url_error_message.setText('This item is already in the database.')
+            self.setFixedSize(488, 160)
+            self.url_error_message.setText("Bad url (Invalid item url or game doesn't exist in the database or this item already in the database).")
             return False
         return item
 
@@ -86,11 +87,18 @@ class CodeModalWindow(QtWidgets.QMainWindow):
         self.setObjectName('Code')
         self.setWindowTitle('Code')
         self.setStyleSheet(styles)
-        self.resize(223, 152)
+        self.setFixedSize(223, 152)
         self.title()
         self.inputs()
         self.button()
         self.error_message()
+        self.center()
+        
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QtWidgets.QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
         
     def title(self):
         self.code_title = QtWidgets.QLabel(self)
@@ -121,7 +129,7 @@ class CodeModalWindow(QtWidgets.QMainWindow):
         resp = self.get_response(session, need_code)
         
         if isinstance(resp, dict) and not resp['success']:
-            self.resize(223, 180)
+            self.setFixedSize(223, 180)
             self.invalid_code_message.setText('Invalid code.')
         else:
             cookies = resp.cookies.get_dict()
@@ -155,7 +163,7 @@ class SelectAccountCodeModalWindow(CodeModalWindow):
         resp = self.get_response(session, need_code)
             
         if isinstance(resp, dict) and not resp['success']:
-            self.resize(223, 180)
+            self.setFixedSize(223, 180)
             self.invalid_code_message.setText('Invalid code.')
         else:
             cookies = resp.cookies.get_dict()
@@ -181,7 +189,7 @@ class LoginModalWindow(QtWidgets.QMainWindow):
         with open('steam-trade/ui/css/modals.css') as style:
             styles = style.read()
         self.setObjectName('Login')
-        self.resize(441, 250)
+        self.setFixedSize(441, 250)
         self.policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         self.policy.setHorizontalStretch(0)
         self.policy.setVerticalStretch(0)
@@ -262,7 +270,7 @@ class LoginModalWindow(QtWidgets.QMainWindow):
                 
         if "account name or password" in resp.get("message", ""):
             self.login_error_message.setText(resp.get("message", ""))
-            self.resize(441, 300)
+            self.setFixedSize(441, 300)
             self.password_input.clear()
             self.captcha_input.deleteLater()
             self.captcha_image.clear()
@@ -270,14 +278,14 @@ class LoginModalWindow(QtWidgets.QMainWindow):
         if "too many login failures" in resp.get("message", ""):
             self.password_input.clear()
             self.login_error_message.setText(resp.get("message", ""))
-            self.resize(441, 300) 
+            self.setFixedSize(441, 300) 
             self.captcha_input.deleteLater()
             self.captcha_image.clear()
             
         if resp.get("captcha_needed", False) and 'too many login failures' not in resp.get("message", ""):
             self.password_input.clear()
             self.login_error_message.setText(resp.get("message", ""))
-            self.resize(441, 370)
+            self.setFixedSize(441, 370)
             self.captcha = QtGui.QImage()
             captcha_gid = resp.get("captcha_gid")
             self.captcha.loadFromData(requests.get(f'{APIEndpoint.COMMUNITY_URL}login/rendercaptcha/?gid={captcha_gid}').content) 
@@ -299,13 +307,13 @@ class AccountSelectModalWindow(QtWidgets.QMainWindow):
         super().__init__()
         self.data = {
             'one': {
-                'resize': [564, 230],
+                'size': [564, 230],
                 'scroll': [20, 70, 531, 101],
                 'scroll_widget': [0, 0, 529, 99],
                 'button': [230, 190, 89, 25]
             },
             'many': {
-                'resize': [564, 310],
+                'size': [564, 310],
                 'scroll': [20, 70, 531, 181],
                 'scroll_widget': [0, 0, 529, 179],
                 'button': [250, 270, 89, 25]
@@ -316,18 +324,23 @@ class AccountSelectModalWindow(QtWidgets.QMainWindow):
 
     def setupUi(self):
         self.setObjectName('AccountSelect')
-
-        # self.resize(*self.params['resize'])
         self.setStyleSheet("background-color: #1b1c22;")
         self.title()
         self.scroll()
         self.button()
         self.set_geometry()
+        self.center()
+    
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QtWidgets.QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
     
     def set_geometry(self):
         self.accounts = get_users()
         self.params = self.data['one'] if len(get_users()) == 1 else self.data['many']
-        self.resize(*self.params['resize'])
+        self.setFixedSize(*self.params['size'])
         self.account_scrollArea.setGeometry(QtCore.QRect(*self.params['scroll']))
         self.account_scrollAreaWidgetContents.setGeometry(QtCore.QRect(*self.params['scroll_widget']))
         self.add_account_btn.setGeometry(QtCore.QRect(*self.params['button']))

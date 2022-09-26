@@ -3,7 +3,7 @@ import webbrowser
 import os
 import json
 
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtWidgets, QtCore
 
 from .widgets import QTextEditLogger, ReadOnlyDelegate
 from .modals import AddItemModalWindow
@@ -271,7 +271,7 @@ class TablePage:
         dlg = QtWidgets.QFileDialog()
         path_to_json_file = dlg.getOpenFileName(
             self.page,
-            'Open file', 
+            'Select file', 
             os.getcwd(), 
             'JSON document (*.json)'
         )[0]

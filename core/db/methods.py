@@ -44,21 +44,23 @@ def change_user(changed_account):
     changed_account.is_login = True
     dbsession.commit()
 
-
 def set_user_avatar(link):
     user = dbsession.query(User).filter(User.is_login == 1) .first()
     user.avatar = link
     dbsession.commit()
 
-def get_item(name):
-    item = dbsession.query(Item).filter(Item.name==name).first()
+def get_item(name, user=None):
+    if user is None:
+        user = get_user()
+    item = dbsession.query(Item).filter(Item.name==name, Item.user==user.pk).first()
     return item
 
 def get_items():
-    items = dbsession.query(Item).all()
+    user = get_user()
+    items = dbsession.query(Item).filter(Item.user==user.pk).all()
     return items
 
-def add_item(url, name=None, game_id=None):
+def add_item(url, name=None, game_id=None, user=None):
     if name is None or game_id is None:
         name, game_id = parse(url)
     games = {
@@ -67,86 +69,108 @@ def add_item(url, name=None, game_id=None):
         '440': 'TF2',
         '753': 'STEAM',
     }
-    game = dbsession.query(Game).filter(Game.name==games[game_id]).first()
-    item = Item(name=name, steam_url=url, game=game.pk)
-    dbsession.add(item)
-    dbsession.commit()
-    return item
+    
+    if user is None:
+        user = get_user()
+    
+    if get_item(name) is None:
+        game = dbsession.query(Game).filter(Game.name==games[game_id]).first()
+        item = Item(name=name, steam_url=url, game=game.pk, user=user.pk)
+        dbsession.add(item)
+        dbsession.commit()
+        return item
+    
+    raise KeyError()
 
 def add_items(path):
+    user = get_user()
     with open(path) as items_json:
         items = json.load(items_json)
     for item in items:
-        add_item(item['url'], name=item['name'], game_id=item['game'])
-        
+        add_item(item['url'], name=item['name'], game_id=item['game'], user=user)
+     
 def delete_item(name):
-    item = dbsession.query(Item).filter(Item.name==name).first()
+    user = get_user()
+    item = dbsession.query(Item).filter(Item.name==name, Item.user==user.pk).first()
     dbsession.delete(item)
     dbsession.commit()
     
 def delete_items():
-    dbsession.query(Item).delete()
+    user = get_user()
+    dbsession.query(Item).filter(Item.user==user.pk).delete()
     dbsession.commit()
     
 def set_buy_item(name):
-    item = dbsession.query(Item).filter(Item.name==name).first()
+    user = get_user()
+    item = dbsession.query(Item).filter(Item.name==name, Item.user==user.pk).first()
     item.buy_item = not item.buy_item
     dbsession.commit()
 
 def set_buy_items(state):
-    items = dbsession.query(Item).all()
+    user = get_user()
+    items = dbsession.query(Item).filter(Item.user==user.pk).all()
     for item in items:
         item.buy_item = True if state else False
     dbsession.commit()
     
 def check_buy_items():
-    items = dbsession.query(Item.buy_item).all()
+    user = get_user()
+    items = dbsession.query(Item.buy_item).filter(Item.user==user.pk).all()
     return all([item[0] for item in items])
 
 def set_sell_item(name):
-    item = dbsession.query(Item).filter(Item.name==name).first()
+    user = get_user()
+    item = dbsession.query(Item).filter(Item.name==name, Item.user==user.pk).first()
     item.sell_item = not item.sell_item
     dbsession.commit()
 
 def set_sell_items(state):
-    items = dbsession.query(Item).all()
+    user = get_user()
+    items = dbsession.query(Item).filter(Item.user==user.pk).all()
     for item in items:
         item.sell_item = True if state else False
     dbsession.commit()
     
 def check_sell_items():
-    items = dbsession.query(Item.sell_item).all()
+    user = get_user()
+    items = dbsession.query(Item.sell_item).filter(Item.user==user.pk).all()
     return all([item[0] for item in items])
 
 def set_amount(name, value):
-    item = dbsession.query(Item).filter(Item.name==name).first()
+    user = get_user()
+    item = dbsession.query(Item).filter(Item.name==name, Item.user==user.pk).first()
     item.amount = value
     dbsession.commit()
 
 def set_amount_all(value):
-    items = dbsession.query(Item).all()
+    user = get_user()
+    items = dbsession.query(Item).filter(Item.user==user.pk).all()
     for item in items:
         item.amount = value
     dbsession.commit()
     
 def set_buy_price(name, value):
-    item = dbsession.query(Item).filter(Item.name==name).first()
+    user = get_user()
+    item = dbsession.query(Item).filter(Item.name==name, Item.user==user.pk).first()
     item.buy_price = value
     dbsession.commit()
 
 def set_buy_price_all(value):
-    items = dbsession.query(Item).all()
+    user = get_user()
+    items = dbsession.query(Item).filter(Item.user==user.pk).all()
     for item in items:
         item.buy_price = value
     dbsession.commit()  
   
 def set_sell_price(name, value):
-    item = dbsession.query(Item).filter(Item.name==name).first()
+    user = get_user()
+    item = dbsession.query(Item).filter(Item.name==name, Item.user==user.pk).first()
     item.sell_price = value
     dbsession.commit()
 
 def set_sell_price_all(value):
-    items = dbsession.query(Item).all()
+    user = get_user()
+    items = dbsession.query(Item).filter(Item.user==user.pk).all()
     for item in items:
         item.sell_price = value
     dbsession.commit()
@@ -182,15 +206,17 @@ def get_game_by_pk(pk):
     return game
 
 def get_items_sell(analysis=False):
-    items = dbsession.query(Item).filter(Item.sell_item == True, Item.analysis == analysis).all()
+    user = get_user()
+    items = dbsession.query(Item).filter(Item.sell_item == True, Item.analysis == analysis, Item.user==user.pk).all()
     return items
 
 def get_items_buy(analysis=False):
-    items = dbsession.query(Item).filter(Item.buy_item == True, Item.analysis == analysis).all()
+    user = get_user()
+    items = dbsession.query(Item).filter(Item.buy_item==True, Item.analysis==analysis, Item.user==user.pk).all()
     return items
 
 def get_you_receive(buyer_pays):
-    price = dbsession.query(BuyerToReceive).filter(BuyerToReceive.buyer_pays == buyer_pays).first()
+    price = dbsession.query(BuyerToReceive).filter(BuyerToReceive.buyer_pays==buyer_pays).first()
     return price.you_receive
 
 def delete_bad_items(items):

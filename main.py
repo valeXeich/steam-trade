@@ -22,7 +22,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.session = do_login()
         self.guard = SteamGuard(self.session, get_secrets(self.user))
         self.setObjectName('MainWindow')
-        self.resize(1280, 720)
+        self.setFixedSize(1280, 720)
+        self.center()
         self.sidebar = Sidebar(self, self.user, self.session, self.guard)
         self.main = QtWidgets.QStackedWidget(self)
         self.main.setGeometry(QtCore.QRect(180, 0, 1121, 720))
@@ -49,6 +50,12 @@ class MainWindow(QtWidgets.QMainWindow):
         for btn in buttons:
             if btn != button:
                 btn.setStyleSheet('QPushButton {color: #acacae; font-size: 14px; border: none; background-color: #25262c} QPushButton::hover {background-color: #1b1c22;}')
+
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QtWidgets.QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
 
     def restart(self):
         QtCore.QCoreApplication.quit()

@@ -6,18 +6,11 @@ from ui.widgets import Sidebar
 from ui.pages import TablePage, LogPage, SettingPage
 from ui.modals import LoginModalWindow
 
-from core.db.methods import is_user_login, get_user, get_items
+from core.db.methods import is_user_login, get_user, get_items, get_secrets
 from core.login import do_login
+from core.market import Market
 
-from core.utils import get_secrets
 from steamlib.guard import SteamGuard
-from core.db.db import dbsession
-from core.db.models import User
-
-# user = User(account_name='eblan2', avatar='https://avatars.cloudflare.steamstatic.com/7190e53762e093b93291f634668565880849f0bc_full.jpg', steam_id='123', oauth_token='123', session_id='123', is_login=False)
-# dbsession.add(user)
-# dbsession.commit()
-
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -27,14 +20,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.user = get_user()
         self.items = get_items()
         self.session = do_login()
-        self.guard = SteamGuard(self.session, get_secrets(self.user))
+        self.secrets = get_secrets()
+        self.guard = SteamGuard(self.session, self.secrets)
+        self.market = Market(self.session, self.secrets)
         self.setObjectName('MainWindow')
         self.resize(1280, 720)
         self.sidebar = Sidebar(self, self.user, self.session, self.guard)
         self.main = QtWidgets.QStackedWidget(self)
         self.main.setGeometry(QtCore.QRect(180, 0, 1121, 720))
         self.main.setObjectName("main")
-        self.table = TablePage(self.items)
+        self.table = TablePage(self.items, self.market)
         self.logs = LogPage()
         self.settings = SettingPage()
         self.main.addWidget(self.table.page)
@@ -48,7 +43,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sidebar.table_button.clicked.connect(lambda: self.set_current_page(self.table.page, self.sidebar.table_button))
         self.sidebar.log_button.clicked.connect(lambda: self.set_current_page(self.logs.page, self.sidebar.log_button))
         self.sidebar.settings_button.clicked.connect(lambda: self.set_current_page(self.settings.page, self.sidebar.settings_button))
-    
+
     def set_current_page(self, page, button):
         buttons = [self.sidebar.log_button, self.sidebar.table_button, self.sidebar.settings_button]
         self.main.setCurrentWidget(page)

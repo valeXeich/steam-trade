@@ -63,3 +63,15 @@ QProgressBar {
 QProgressBar::chunk {
     background-color: #3c50fa;
 }
+
+#confirmation-btn {
+    color: #fff;
+    background-color: #3c50fa;
+    border-radius: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+#confirmation-btn::hover {
+    background-color: rgb(42, 54, 165);
+}

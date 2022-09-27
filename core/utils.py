@@ -80,9 +80,3 @@ def item_in_orders(buy_orders, item):
 
 def convert_to_penny(price):
     return str(int(float(price) * 100)).replace('.', '')
-
-def get_secrets(user):
-    return {
-        'shared_secret': user.shared_secret,
-        'identity_secret': user.identity_secret
-    }

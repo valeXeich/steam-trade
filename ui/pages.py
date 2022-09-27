@@ -5,7 +5,7 @@ import os
 from PyQt5 import QtWidgets, QtCore
 
 from .widgets import QTextEditLogger, ReadOnlyDelegate
-from .modals import AddItemModalWindow
+from .modals import AddItemModalWindow, ProgressBarModalWindow
 from core.db.methods import ( 
     add_items,
     get_item,
@@ -27,8 +27,9 @@ from core.db.methods import (
 )
 
 class TablePage:
-    def __init__(self, items):
+    def __init__(self, items, market):
         self.items = items
+        self.market = market
         with open('steam-trade/ui/css/table-page.css') as style:
             styles = style.read()
         self.page = QtWidgets.QWidget()
@@ -231,27 +232,48 @@ class TablePage:
         self.table.setCellWidget(0, 6, button_delete)
 
     def buttons_box(self):
-        self.buttons_area = QtWidgets.QWidget(self.page)
-        self.buttons_area.setGeometry(QtCore.QRect(810, 650, 271, 80))
-        self.buttons_area.setObjectName('buttons_area_table')
-        self.buttons_layout = QtWidgets.QHBoxLayout(self.buttons_area)
-        self.buttons_layout.setContentsMargins(0, 0, 0, 0)
-        self.buttons_layout.setSpacing(6)
-        self.buttons_layout.setObjectName("buttons_layout")
+        self.buttons_area_right = QtWidgets.QWidget(self.page)
+        self.buttons_area_right.setGeometry(QtCore.QRect(810, 650, 271, 80))
+        self.buttons_area_right.setObjectName('buttons_area_table')
+        self.buttons_layout_right = QtWidgets.QHBoxLayout(self.buttons_area_right)
+        self.buttons_layout_right.setContentsMargins(0, 0, 0, 0)
+        self.buttons_layout_right.setSpacing(6)
+        self.buttons_layout_right.setObjectName("buttons_layout")
+
+        self.buttons_area_left = QtWidgets.QWidget(self.page)
+        self.buttons_area_left.setGeometry(QtCore.QRect(20, 650, 271, 80))
+        self.buttons_area_left.setObjectName('buttons_area_table')
+        self.buttons_layout_left = QtWidgets.QHBoxLayout(self.buttons_area_left)
+        self.buttons_layout_left.setContentsMargins(0, 0, 0, 0)
+        self.buttons_layout_left.setSpacing(6)
+        self.buttons_layout_left.setObjectName("buttons_layout")
+
         self.buttons()
     
     def buttons(self):
-        self.add_item_btn = QtWidgets.QPushButton(self.buttons_area)
+        self.add_item_btn = QtWidgets.QPushButton(self.buttons_area_right)
         self.add_item_btn.setObjectName('default-btn')
         self.add_item_btn.setText('Add Item')
         self.add_item_btn.clicked.connect(self.open_add_item_window)
-        self.buttons_layout.addWidget(self.add_item_btn)
+        self.buttons_layout_right.addWidget(self.add_item_btn)
         
-        self.update_table_btn = QtWidgets.QPushButton(self.buttons_area)
+        self.update_table_btn = QtWidgets.QPushButton(self.buttons_area_right)
         self.update_table_btn.setObjectName('default-btn')
         self.update_table_btn.setText('Update Table')
         self.update_table_btn.clicked.connect(self.update_table)
-        self.buttons_layout.addWidget(self.update_table_btn)
+        self.buttons_layout_right.addWidget(self.update_table_btn)
+
+        self.remove_orders_btn = QtWidgets.QPushButton(self.buttons_area_left)
+        self.remove_orders_btn.setObjectName('default-btn')
+        self.remove_orders_btn.setText('Remove orders')
+        self.remove_orders_btn.clicked.connect(self.open_progress_bar_window)
+        self.buttons_layout_left.addWidget(self.remove_orders_btn)
+        
+        self.remove_unprofitable_btn = QtWidgets.QPushButton(self.buttons_area_left)
+        self.remove_unprofitable_btn.setObjectName('default-btn')
+        self.remove_unprofitable_btn.setText('Remove unprofitable')
+        self.remove_unprofitable_btn.clicked.connect(self.update_table)
+        self.buttons_layout_left.addWidget(self.remove_unprofitable_btn)
     
     def update_table(self):
         dlg = QtWidgets.QFileDialog()
@@ -276,6 +298,13 @@ class TablePage:
         self.window_add_item = AddItemModalWindow(self)
         self.window_add_item.setupUi()
         self.window_add_item.show()
+    
+    def open_progress_bar_window(self):
+        self.window_progress_bar = ProgressBarModalWindow(self.market)
+        self.window_progress_bar.setupUi()
+        self.window_progress_bar.show()
+
+    
 
 
 class LogPage:

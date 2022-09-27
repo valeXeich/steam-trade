@@ -1,10 +1,11 @@
 import logging
+from signal import signal
 import requests
 from core.launch import Start
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 from core.guard import SteamGuardTimer
-from .modals import AccountSelectModalWindow
+from .modals import AccountSelectModalWindow, ConfirmModalWindow
 
 
 class Sidebar:
@@ -29,12 +30,12 @@ class Sidebar:
 
     def buttons_box(self):
         self.buttons_area = QtWidgets.QFrame(self.sidebar)
-        self.buttons_area.setGeometry(QtCore.QRect(0, 60, 181, 191))
+        self.buttons_area.setGeometry(QtCore.QRect(0, 105, 181, 191))
         self.buttons_area.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.buttons_area.setFrameShadow(QtWidgets.QFrame.Raised)
         self.buttons_area.setObjectName('buttons_area')
         return self.buttons_area
-    
+
     def buttons(self):
         self.table_button = QtWidgets.QPushButton(self.buttons_area)
         self.table_button.setGeometry(QtCore.QRect(0, 0, 181, 41))
@@ -57,7 +58,20 @@ class Sidebar:
         self.start_button.setObjectName('btn-on')
         self.launch = Start(self.session)
         self.start_button.clicked.connect(self.switch)
-        
+
+        #test
+
+        self.confirmation_button = QtWidgets.QPushButton(self.sidebar)
+        self.confirmation_button.setText('Confirmation')
+        self.confirmation_button.setGeometry(QtCore.QRect(0, 55, 181, 41))
+        self.confirmation_button.setObjectName('confirmation-btn')
+        self.confirmation_button.clicked.connect(self.open_confirmation)
+    
+    def open_confirmation(self):
+        self.t = ConfirmModalWindow(self.session)
+        self.t.setupUi()
+        self.t.show()
+    
     def switch(self):
         if not self.launch.isRunning():
             self.start_button.setObjectName('btn-off')
@@ -84,11 +98,6 @@ class Sidebar:
         self.username.setText(self.user.account_name)
         self.username.setStyleSheet('QPushButton {border: 1px solid #25262c; background-color: #25262c; font-size: 14; color: white; padding: 5px; border-radius: 4px;} QPushButton::hover {background-color: #60626e}')
         self.username.clicked.connect(self.select_account)
-
-        # self.username = QtWidgets.QLabel(self.sidebar)
-        # self.username.setGeometry(QtCore.QRect(60, 680, 67, 17))
-        # self.username.setObjectName("username")
-        # self.username.setText(self.user.account_name)
     
     def select_account(self):
         self.account_select = AccountSelectModalWindow(self.parent.restart)
@@ -140,4 +149,6 @@ class QTextEditLogger(logging.Handler, QtCore.QObject):
 class ReadOnlyDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
         return 
+
+
  

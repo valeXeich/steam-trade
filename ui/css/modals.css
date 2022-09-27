@@ -19,12 +19,97 @@
     color: #acacae;
 }
 
-#login-title, #code-title {
+#login-title, #code-title, #account-title {
     color: #acacae;
     font-weight: bold;
     font-size: 24px;
 }
 
-#AddItemModal, #Login, #Code {
+#AddItemModal, #Login, #Code, #Confirm, #AccountSelect, #ProgressBar {
     background-color: #1b1c22;
 }
+
+#item_label {
+    color: #fff
+}
+
+#default-label {
+    color: #acacae;
+}
+
+QCheckBox::indicator#checkbox {
+    width: 61px;
+    height: 51px;
+}
+
+QCheckBox#checkbox {
+    color: black;
+    background-color: white;
+}
+
+QCheckBox::indicator:unchecked#checkbox {
+    background-color: white;
+}
+
+#scrollAreaWidgetContents, #account-scrollAreaWidgetContents {
+    background-color: #1b1c22;
+}
+
+#scrollArea, #account-scrollArea {
+    border: none;
+}
+
+#confirm-card {
+    border: none;
+}
+
+#nothing-label {
+    background-color: #1b1c22;
+    font-weight: bold;
+}
+
+#account-box {
+    background-color: #2f3136;
+    border-radius: 5px;
+}
+
+#username {
+    color: #fff;
+    font-size: 14px;
+}
+
+#active {
+    color: #3ba55d;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+QPushButton#delete_btn {
+    background-color: #ad473f;
+    border-radius: 7px;
+}
+
+QPushButton::hover#delete_btn {
+    background-color: #8d362f
+}
+
+QPushButton#switch_btn {
+    background-color: #3c50fa;
+    border-radius: 7px;
+}
+
+QPushButton::hover#switch_btn {
+    background-color: #2e3cbb
+}
+
+#progressBar {
+    background-color: #2f3136;
+    border-radius: 10px;
+    color: black;
+}
+
+#progressBar::chunk {
+    background-color: #2e3cbb;
+    border-radius: 10px;
+}
+

@@ -197,3 +197,10 @@ def delete_bad_items(items):
     for item in items:
         dbsession.delete(item)
     dbsession.commit()
+
+def get_secrets():
+    user = get_user()
+    return {
+        'shared_secret': user.shared_secret,
+        'identity_secret': user.identity_secret
+    }

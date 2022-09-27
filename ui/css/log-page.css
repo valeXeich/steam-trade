@@ -1,5 +1,18 @@
-QPlainTextEdit {
+QTextEdit {
     background-color: #25262c; 
     color: white;
 }
 
+#clear-btn {
+    background-color: #1b1c22; 
+    border: 1px solid #acacae; 
+    color: #acacae; 
+    padding: 5px 8px; 
+    border-radius: 10px
+}
+
+#clear-btn::hover {
+    background-color: #3c50fa; 
+    color: #fff; 
+    border: none;
+}

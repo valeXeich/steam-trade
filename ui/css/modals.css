@@ -93,6 +93,11 @@ QPushButton::hover#delete_btn {
     background-color: #8d362f
 }
 
+#error-message {
+    color: #ff605c; 
+    font-size: 14px;
+}
+
 QPushButton#switch_btn {
     background-color: #3c50fa;
     border-radius: 7px;

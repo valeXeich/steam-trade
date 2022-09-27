@@ -32,7 +32,7 @@ class Item(Base):
     __tablename__ = 'Item'
     
     pk = Column(Integer, primary_key=True)
-    name = Column(String(100), unique=True)
+    name = Column(String(100))
     amount = Column(Integer, default=0)
     buy_item = Column(Boolean, default=False)
     sell_item = Column(Boolean, default=False)
@@ -41,7 +41,8 @@ class Item(Base):
     analysis = Column(Boolean, default=False)
     steam_url = Column(String(150))
     created_date = Column(DateTime, default=datetime.datetime.now, nullable=False)
-    game = Column(Integer, ForeignKey('Game.pk'))
+    game = Column(Integer, ForeignKey('Game.pk'), nullable=False)
+    user = Column(Integer, ForeignKey('User.pk'), nullable=False)
     
     def __str__(self) -> str:
         return f'Item: {self.name}'

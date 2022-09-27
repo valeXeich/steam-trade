@@ -1,6 +1,7 @@
 import logging
 import webbrowser
 import os
+import json
 
 from PyQt5 import QtWidgets, QtCore
 
@@ -39,7 +40,21 @@ class TablePage:
         self.table_widget()
         self.buttons_box()
         self.load_items()
+        self.inputs()
 
+    def inputs(self):
+        self.search_input = QtWidgets.QLineEdit(self.page)
+        self.search_input.setGeometry(QtCore.QRect(881, 15, 200, 31))
+        self.search_input.setPlaceholderText('Search')
+        self.search_input.setObjectName('default-input')
+        self.search_input.textChanged.connect(self.search)
+        
+    def search(self):
+        name = self.search_input.text().lower()
+        for row in range(1, self.table.rowCount()):
+            item = self.table.item(row, 0)
+            self.table.setRowHidden(row, name not in item.text().lower())
+        
     def title(self):
         self.title = QtWidgets.QLabel(self.page)
         self.title.setGeometry(QtCore.QRect(20, 10, 111, 41))
@@ -172,7 +187,6 @@ class TablePage:
         set_buy_items(state) if column == 'buy' else set_sell_items(state)
         items = get_items()
             
-            
         for item in items:
             checkbox = getattr(self, f'{item.name}_checkbox_{column}')
             checkbox.setChecked(item.buy_item if column == 'buy' else item.sell_item)
@@ -279,12 +293,12 @@ class TablePage:
         dlg = QtWidgets.QFileDialog()
         path_to_json_file = dlg.getOpenFileName(
             self.page,
-            'Open file', 
+            'Select file', 
             os.getcwd(), 
             'JSON document (*.json)'
         )[0]
         
-        if path_to_json_file != '':
+        if path_to_json_file != '' and self.validate_items_file(path_to_json_file):
             delete_items()
             self.table.setRowCount(1)
             add_items(path_to_json_file)
@@ -293,7 +307,17 @@ class TablePage:
                 row = self.table.rowCount()
                 self.table.insertRow(row)
                 self.add_item_to_table(item, row)
+    
+    def validate_items_file(self, path):
+        with open(path) as items_json:
+            items = json.load(items_json)
         
+        for item in items:
+            if len(item) != 3 or list(item.keys()) != ['name', 'game', 'url']:
+                return False 
+            
+        return True
+    
     def open_add_item_window(self):
         self.window_add_item = AddItemModalWindow(self)
         self.window_add_item.setupUi()
@@ -316,6 +340,7 @@ class LogPage:
         self.page.setStyleSheet(styles)
         self.title()
         self.log_area()
+        self.buttons()
 
     def title(self):
         self.title = QtWidgets.QLabel(self.page)
@@ -323,14 +348,20 @@ class LogPage:
         self.title.setObjectName("title_log")
         self.title.setText('Logs')
 
+    def buttons(self):
+        self.clear_btn = QtWidgets.QPushButton(self.page)
+        self.clear_btn.setGeometry(QtCore.QRect(10, 675, 1071, 30))
+        self.clear_btn.setText('Clear')
+        self.clear_btn.setObjectName('clear-btn')
+        self.clear_btn.clicked.connect(self.log_box.log_widget.clear)
+    
     def log_area(self):
         self.log_box = QTextEditLogger(self.page)
         self.log_box.setFormatter(logging.Formatter('%(asctime)s - %(message)s', "%H:%M:%S"))
-        self.log_box.widget.setGeometry(QtCore.QRect(10, 60, 1071, 631))
-        self.log_box.widget.setStyleSheet('color: red;')
+        self.log_box.log_widget.setGeometry(QtCore.QRect(10, 60, 1071, 600))
         logging.getLogger().addHandler(self.log_box)
         logging.getLogger().setLevel(logging.INFO)
-
+    
 
 class SettingPage:
     def __init__(self) -> None:

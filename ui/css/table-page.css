@@ -16,6 +16,13 @@
     border: none;
 }
 
+#default-input {
+    background-color: #25262c;
+    border-radius: 15px;
+    padding: 5px;
+    color: #acacae;
+}
+
 QTableWidget {
     gridline-color: #1b1c22;
     border: none;

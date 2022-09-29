@@ -2,8 +2,19 @@ import json
 
 from steamlib.utils import get_item_name_id_by_url
 from core.utils import parse, get_avatar_url
-from .db import dbsession
-from .models import BuyerToReceive, ItemNameId, User, Item, Game
+from .db import dbsession, engine
+from .models import BuyerToReceive, ItemNameId, User, Item, Game, Base
+
+def create_db():
+    Base.metadata.create_all(engine)
+    games = dbsession.query(Game).count()
+    if games == 0:
+        add_games()
+
+def add_games():
+    cs, dota, tf = Game(name='CS:GO'), Game(name='DOTA2'), Game(name='TF2')
+    dbsession.add_all([cs, dota, tf])
+    dbsession.commit()
 
 def add_user(account_name, session, is_login=True):
     cookies = session.cookies.get_dict()
@@ -97,7 +108,9 @@ def delete_item(name):
     
 def delete_items():
     user = get_user()
-    dbsession.query(Item).filter(Item.user==user.pk).delete()
+    items = dbsession.query(Item).filter(Item.user==user.pk).all()
+    for item in items:
+        dbsession.delete(item)
     dbsession.commit()
     
 def set_buy_item(name):

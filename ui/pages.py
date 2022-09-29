@@ -79,6 +79,17 @@ class TablePage:
         self.table.setColumnWidth(6, 113)
         delegate = ReadOnlyDelegate(self.table)
         self.table.setItemDelegateForColumn(0, delegate)
+        self.table.verticalHeader().setVisible(False)
+        
+        self.no_items_label = QtWidgets.QLabel(self.page)
+        self.no_items_label.setGeometry(QtCore.QRect(350, 60, 400, 590))
+        self.no_items_label.setText("You don't have items in the database")
+        self.no_items_label.setObjectName('no-items')
+        self.no_items_label.hide()
+        
+        if not self.items:
+            self.table.horizontalHeader().hide()
+            self.no_items_label.show()
           
     def set_item_value(self, item):
         row, column = item.row(), item.column()
@@ -124,13 +135,13 @@ class TablePage:
     
     def load_items(self):
         row = 1
-        self.table.setRowCount(len(self.items) + 1)
-        self.action_all()
-        self.table.verticalHeader().setVisible(False)
-        for item in self.items:
-            self.add_item_to_table(item, row)
-            row += 1
-            
+        if self.items:
+            self.table.setRowCount(len(self.items) + 1)
+            self.action_all()
+            for item in self.items:
+                self.add_item_to_table(item, row)
+                row += 1
+            self.table.horizontalHeader().show()
         self.table.itemChanged.connect(self.set_item_value)
         self.table.itemDoubleClicked.connect(self.open_url)
     
@@ -196,9 +207,16 @@ class TablePage:
         delete_item(name)
         self.table.removeRow(row)
         
+        if not get_items():
+            self.table.setRowCount(0)
+            self.table.horizontalHeader().hide()
+            self.no_items_label.show()
+        
     def delete_items(self):
         delete_items()
-        self.table.setRowCount(1)
+        self.table.setRowCount(0)
+        self.table.horizontalHeader().hide()
+        self.no_items_label.show()
             
     def action_all(self):
         widget_buy = QtWidgets.QWidget()
@@ -303,6 +321,11 @@ class TablePage:
             self.table.setRowCount(1)
             add_items(path_to_json_file)
             items = get_items()
+            
+            self.table.horizontalHeader().show()
+            self.no_items_label.hide()
+            self.action_all()
+            
             for item in items:
                 row = self.table.rowCount()
                 self.table.insertRow(row)
@@ -329,8 +352,6 @@ class TablePage:
         self.window_progress_bar.show()
 
     
-
-
 class LogPage:
     def __init__(self) -> None:
         with open('steam-trade/ui/css/log-page.css') as style:

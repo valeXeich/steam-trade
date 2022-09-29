@@ -6,7 +6,7 @@ from ui.widgets import Sidebar
 from ui.pages import TablePage, LogPage, SettingPage
 from ui.modals import LoginModalWindow
 
-from core.db.methods import is_user_login, get_user, get_items, get_secrets
+from core.db.methods import is_user_login, get_user, get_items, get_secrets, create_db
 from core.login import do_login
 from core.market import Market
 
@@ -68,14 +68,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    win = MainWindow()
+    create_db()
+    main_win = MainWindow()
     login = is_user_login()
     if not login:
-        login_win = LoginModalWindow(win)
+        login_win = LoginModalWindow(main_win)
         login_win.setupUi()
         login_win.show()
     else:
-        win.setupUi()
-        win.show()
+        main_win.setupUi()
+        main_win.show()
     sys.exit(app.exec_())
     

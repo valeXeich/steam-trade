@@ -6,14 +6,18 @@ from decimal import Decimal
 import urllib
 from bs4 import BeautifulSoup
 
+
+def get_correct_price(price):
+    data = str(price).split('.')
+    if len(data[-1]) == 1:
+        price = str(price) + '0'
+    elif len(data) == 1:
+        price = str(price) + '.00'
+    return price
+
 def get_correct_last_sell_order(currency, item_name_id):
     last_sell_order = get_lowest_sell_order(currency, item_name_id)['full']
-    data = str(last_sell_order).split('.')
-    if len(data[-1]) == 1:
-        last_sell_order = str(last_sell_order) + '0'
-    elif len(data) == 1:
-        last_sell_order = str(last_sell_order) + '.00'
-    return last_sell_order
+    return get_correct_price(last_sell_order)
 
 def get_price(currency, item_name_id, method):
     if method == 'sell':
@@ -42,8 +46,8 @@ def get_two_last_sell_orders(currency ,item_name_id, session):
         'country': 'UA',
     }
     response = session.get(f'{APIEndpoint.COMMUNITY_URL}market/itemordershistogram', params=params).json()
-    first_price = response['sell_order_graph'][0][0]
-    second_price = response['sell_order_graph'][1][0]
+    first_price = get_correct_price(response['sell_order_graph'][0][0])
+    second_price = get_correct_price(response['sell_order_graph'][1][0])
     return {'first_price': first_price, 'second_price': second_price}
 
 def get_buy_order_id(buy_orders, item):

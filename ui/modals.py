@@ -9,8 +9,8 @@ from steamlib.confirmation import ConfirmExecutor
 from steamlib.models import Tag
 from steamlib.exceptions import InvalidDataError
 from steamlib.models import APIEndpoint
-from core.db.methods import add_user, add_item, get_users, delete_user, change_user, get_last_added_user, get_secrets
-from core.threads import ProgressBarThread
+from core.db.methods import add_user, add_item, get_users, delete_user, change_user, get_last_added_user, get_secrets, get_items
+from core.threads import ProgressBarThread, DeleteUnprofitableThread
 import requests
 
 
@@ -548,14 +548,14 @@ class ConfirmModalWindow(QtWidgets.QMainWindow):
 
             self.confirm_label_type = QtWidgets.QLabel(self.confirm_card)
             item_name = item['name'][:29] + '...'
-            self.confirm_label_type.setGeometry(QtCore.QRect(80, 10, 200, 16))
+            self.confirm_label_type.setGeometry(QtCore.QRect(80, 10, 200, 17))
             self.confirm_label_type.setObjectName("item_label")
             self.confirm_label_type.setText(item_name)
 
             self.confirm_label_money = QtWidgets.QLabel(self.confirm_card)
-            self.confirm_label_money.setGeometry(QtCore.QRect(76, 30, 130, 16))
+            self.confirm_label_money.setGeometry(QtCore.QRect(80, 30, 200, 17))
             self.confirm_label_money.setObjectName("default-label")
-            self.confirm_label_money.setText(item['price'])
+            self.confirm_label_money.setText(item['description'])
 
             self.confirm_label_time = QtWidgets.QLabel(self.confirm_card)
             self.confirm_label_time.setGeometry(QtCore.QRect(80, 50, 130, 17))
@@ -577,7 +577,8 @@ class ConfirmModalWindow(QtWidgets.QMainWindow):
     
     def select_all(self, state):
         for confirm in self.confirmation_list:
-            confirm['checkbox'].setChecked(state)
+            if confirm.get('checkbox'):
+                confirm['checkbox'].setChecked(state)
     
     def buttons(self):
         self.h_layout = QtWidgets.QWidget(self)
@@ -600,8 +601,11 @@ class ConfirmModalWindow(QtWidgets.QMainWindow):
     def confirm_items(self, tag):
         for confirm, index in zip(self.confirmation_list, range(len(self.confirmation_list))):
             if confirm.get('checkbox') and confirm.get('checkbox').isChecked():
-                item_id = confirm['item']['asset_id']
-                self.confirmation.confirm_sell_listings(item_id, tag)
+                item_id = confirm['item']['id']
+                if confirm['item']['trade']:
+                    self.confirmation.confirm_trade_offers(item_id, tag)
+                else:
+                    self.confirmation.confirm_sell_listings(item_id, tag)
                 self.delete_confirm_card(confirm['frame'])
                 del self.confirmation_list[index]['checkbox']
                 self.confirm_total -= 1
@@ -630,11 +634,16 @@ class ConfirmModalWindow(QtWidgets.QMainWindow):
 
 
 class ProgressBarModalWindow(QtWidgets.QMainWindow):
-    def __init__(self, market):
+    def __init__(self, market, action, table):
         super().__init__()
         self.market = market
-        self.buy_orders = self.market.get_market_listings()['buy_orders']
-        self.buy_orders_length = len(self.buy_orders)
+        self.action = action
+        if action == 'orders':
+            self.items = self.market.get_market_listings()['buy_orders']
+        else: 
+            self.items = get_items()
+        self.items_length = len(self.items)
+        self.table = table
 
     def setupUi(self):
         with open('steam-trade/ui/css/modals.css') as style:
@@ -643,7 +652,7 @@ class ProgressBarModalWindow(QtWidgets.QMainWindow):
         self.setFixedSize(475, 80)
         self.setStyleSheet(styles)
         self.setObjectName('ProgressBar')
-        if self.buy_orders_length == 0:
+        if self.items_length == 0:
             self.nothing_label = QtWidgets.QLabel(self)
             self.nothing_label.setObjectName("default-label")
             self.nothing_label.setGeometry(QtCore.QRect(185, 10, 200, 20))
@@ -653,9 +662,12 @@ class ProgressBarModalWindow(QtWidgets.QMainWindow):
             self.progressBar.setObjectName("progressBar")
             self.progressBar.setGeometry(QtCore.QRect(10, 40, 451, 20))
             self.progressBar.setMinimum(0)
-            self.progressBar.setMaximum(self.buy_orders_length)
+            self.progressBar.setMaximum(self.items_length)
             self.progressBar.setTextVisible(False)
-            self.progressThread = ProgressBarThread(self.market, self.buy_orders)
+            if self.action == 'orders':
+                self.progressThread = ProgressBarThread(self.market, self.items)
+            else:
+                self.progressThread = DeleteUnprofitableThread(self.market, self.items)
             self.count_items = QtWidgets.QLabel(self)
             self.count_items.setObjectName("default-label")
             self.count_items.setGeometry(QtCore.QRect(215, 10, 100, 20))
@@ -671,10 +683,19 @@ class ProgressBarModalWindow(QtWidgets.QMainWindow):
     def start(self):
         self.progressThread.start()
         self.progressThread.signal.connect(self.run)
+        if not self.action == 'orders':
+            self.progressThread.delete_signal.connect(self.delete_items)
     
     def run(self, count):
-        self.count_items.setText(f'{count + 1}/{self.buy_orders_length}')
+        self.count_items.setText(f'{count + 1}/{self.items_length}')
         self.progressBar.setValue(count + 1)
-        if self.buy_orders_length == count + 1:
+        if self.items_length == count + 1:
             time.sleep(0.3)
             self.close()
+    
+    def delete_items(self, items):
+        for item in items:
+            self.table.delete_item(item.name)
+
+    
+    

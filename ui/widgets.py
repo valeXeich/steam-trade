@@ -1,16 +1,16 @@
 import logging
 from signal import signal
 import requests
-from core.launch import Start
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-from core.guard import SteamGuardTimer
+from core.threads import SteamGuardTimer, Start
+from core.db.methods import get_secrets
 from .modals import AccountSelectModalWindow, ConfirmModalWindow
 
 
 class Sidebar:
     
-    def __init__(self, parent, user, session, guard) -> None:
+    def __init__(self, parent, user, session, guard, secrets) -> None:
         with open('steam-trade/ui/css/sidebar.css') as style:
             self.styles = style.read()
         self.parent = parent
@@ -18,6 +18,7 @@ class Sidebar:
         self.session = session
         self.user = user
         self.guard = guard
+        self.secrets = secrets
         self.sidebar.setGeometry(QtCore.QRect(0, 0, 181, 721))
         self.sidebar.setObjectName("sidebar")
         self.sidebar.setStyleSheet(self.styles)
@@ -30,7 +31,10 @@ class Sidebar:
 
     def buttons_box(self):
         self.buttons_area = QtWidgets.QFrame(self.sidebar)
-        self.buttons_area.setGeometry(QtCore.QRect(0, 105, 181, 191))
+        if self.secrets['identity_secret']:
+            self.buttons_area.setGeometry(QtCore.QRect(0, 105, 181, 191))
+        else:
+            self.buttons_area.setGeometry(QtCore.QRect(0, 60, 181, 191))
         self.buttons_area.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.buttons_area.setFrameShadow(QtWidgets.QFrame.Raised)
         self.buttons_area.setObjectName('buttons_area')
@@ -59,13 +63,12 @@ class Sidebar:
         self.launch = Start(self.session)
         self.start_button.clicked.connect(self.switch)
 
-        #test
-
-        self.confirmation_button = QtWidgets.QPushButton(self.sidebar)
-        self.confirmation_button.setText('Confirmation')
-        self.confirmation_button.setGeometry(QtCore.QRect(0, 55, 181, 41))
-        self.confirmation_button.setObjectName('confirmation-btn')
-        self.confirmation_button.clicked.connect(self.open_confirmation)
+        if self.secrets['identity_secret']:
+            self.confirmation_button = QtWidgets.QPushButton(self.sidebar)
+            self.confirmation_button.setText('Confirmation')
+            self.confirmation_button.setGeometry(QtCore.QRect(0, 55, 181, 41))
+            self.confirmation_button.setObjectName('confirmation-btn')
+            self.confirmation_button.clicked.connect(self.open_confirmation)
     
     def open_confirmation(self):
         self.t = ConfirmModalWindow(self.session)

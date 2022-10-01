@@ -90,3 +90,16 @@ class Market(SteamMarket):
                     self.cancel_buy_order(buy_order_id)
                 bad_items.append(item)
         delete_bad_items(bad_items)
+    
+    def delete_unprofitable_item(self, item, currency, buy_orders):
+        item_name_id = get_item_nameid(item)
+        last_two_orders = get_two_last_sell_orders(currency, item_name_id, self._session)
+        price = get_price(currency, item_name_id, 'buy')
+        first_receive = get_you_receive(last_two_orders['first_price'])
+        second_receive = get_you_receive(last_two_orders['second_price'])
+        result = float(first_receive) - (price / 100) < 0 and float(second_receive) - (price / 100) < 0
+        if result:
+            buy_order_id = get_buy_order_id(buy_orders, item)
+            if buy_order_id is not None:
+                self.cancel_buy_order(buy_order_id)
+            return item

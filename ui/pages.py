@@ -280,13 +280,13 @@ class TablePage:
         self.remove_orders_btn = QtWidgets.QPushButton(self.buttons_area_left)
         self.remove_orders_btn.setObjectName('default-btn')
         self.remove_orders_btn.setText('Remove orders')
-        self.remove_orders_btn.clicked.connect(self.open_progress_bar_window)
+        self.remove_orders_btn.clicked.connect(lambda: self.open_progress_bar_window('orders'))
         self.buttons_layout_left.addWidget(self.remove_orders_btn)
         
         self.remove_unprofitable_btn = QtWidgets.QPushButton(self.buttons_area_left)
         self.remove_unprofitable_btn.setObjectName('default-btn')
-        self.remove_unprofitable_btn.setText('Remove unprofitable')
-        self.remove_unprofitable_btn.clicked.connect(self.update_table)
+        self.remove_unprofitable_btn.setText('Remove bad items')
+        self.remove_unprofitable_btn.clicked.connect(lambda: self.open_progress_bar_window('unprofitable'))
         self.buttons_layout_left.addWidget(self.remove_unprofitable_btn)
     
     def update_table(self):
@@ -323,9 +323,10 @@ class TablePage:
         self.window_add_item.setupUi()
         self.window_add_item.show()
     
-    def open_progress_bar_window(self):
-        self.window_progress_bar = ProgressBarModalWindow(self.market)
+    def open_progress_bar_window(self, action):
+        self.window_progress_bar = ProgressBarModalWindow(self.market, action, self)
         self.window_progress_bar.setupUi()
+        self.window_progress_bar.setWindowModality(QtCore.Qt.ApplicationModal)
         self.window_progress_bar.show()
 
     

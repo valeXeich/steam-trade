@@ -9,8 +9,8 @@ from ui.modals import LoginModalWindow
 from core.db.methods import is_user_login, get_user, get_items, get_secrets
 from core.login import do_login
 from core.market import Market
-
 from steamlib.guard import SteamGuard
+
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -26,7 +26,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setObjectName('MainWindow')
         self.setFixedSize(1280, 720)
         self.center()
-        self.sidebar = Sidebar(self, self.user, self.session, self.guard)
+        self.sidebar = Sidebar(self, self.user, self.session, self.guard, self.secrets)
         self.main = QtWidgets.QStackedWidget(self)
         self.main.setGeometry(QtCore.QRect(180, 0, 1121, 720))
         self.main.setObjectName("main")

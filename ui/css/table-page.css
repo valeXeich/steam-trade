@@ -2,12 +2,17 @@
     color: #acacae;
 }
 
+#no-items {
+    font-size: 24px; 
+    color: #acacae;
+}
+
 #default-btn {
     background-color: #1b1c22; 
     border: 1px solid #acacae; 
     color: #acacae; 
     padding: 5px 8px; 
-    border-radius: 10px
+    border-radius: 10px;
 }
 
 #default-btn::hover {

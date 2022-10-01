@@ -61,6 +61,13 @@ class AddItemModalWindow(QtWidgets.QMainWindow):
         
         if not isinstance(item, bool):
             row = self.table_page.table.rowCount()
+            items = get_items()
+            if len(items) == 1:
+                self.table_page.table.setRowCount(1)
+                self.table_page.table.horizontalHeader().show()
+                self.table_page.action_all()
+                self.table_page.no_items_label.hide()
+                row += 1 if row == 0 else row
             self.table_page.table.insertRow(row)
             self.table_page.add_item_to_table(item, row)
             time.sleep(.3)

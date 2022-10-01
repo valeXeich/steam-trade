@@ -1,0 +1,12 @@
+QPushButton#GuardButton {
+    background-color: #25262c;
+    border-radius: 6px;
+    image: url("steam-trade/ui/assets/guard_add.png");
+    padding: 5;
+}
+
+QPushButton:hover#GuardButton {
+    background-color: #454850; 
+    border-radius: 6px;
+    border: none;
+}

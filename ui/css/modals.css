@@ -118,3 +118,18 @@ QPushButton::hover#switch_btn {
     border-radius: 10px;
 }
 
+#settingsCentralWidget {
+    background: #25262c;
+    border-radius: 10px;
+}
+
+#settingsTitleLabel {
+    color: #acacae; 
+    font-weight: bold; 
+    font-size: 24px;
+}
+
+#settingsAutoconfirmLabel, #settingsGuardLabel {
+    color: #acacae; 
+    font-weight: bold;
+}

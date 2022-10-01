@@ -7,7 +7,8 @@ from PyQt5 import QtWidgets, QtCore
 
 from .widgets import QTextEditLogger, ReadOnlyDelegate
 from .modals import AddItemModalWindow, ProgressBarModalWindow
-from core.db.methods import ( 
+from core.db.methods import (
+    get_user,
     add_items,
     get_item,
     get_items,
@@ -26,6 +27,11 @@ from core.db.methods import (
     set_sell_price,
     set_sell_price_all,  
 )
+from core.utils import parse
+
+
+from .components.buttons.GetJSONButton.GetJSONButton import GetJSONButton
+
 
 class TablePage:
     def __init__(self, items, market):
@@ -44,7 +50,7 @@ class TablePage:
 
     def inputs(self):
         self.search_input = QtWidgets.QLineEdit(self.page)
-        self.search_input.setGeometry(QtCore.QRect(881, 15, 200, 31))
+        self.search_input.setGeometry(QtCore.QRect(840, 15, 200, 31))
         self.search_input.setPlaceholderText('Search')
         self.search_input.setObjectName('default-input')
         self.search_input.textChanged.connect(self.search)
@@ -123,8 +129,7 @@ class TablePage:
         else:
             set_sell_item(name)
             self.checkbox_sell_all.setChecked(check_sell_items())     
-        
-        
+             
     def set_checkbox_state(self, item):
         checkbox_buy = getattr(self, f'{item.name}_checkbox_buy')
         checkbox_sell = getattr(self, f'{item.name}_checkbox_sell')
@@ -306,7 +311,27 @@ class TablePage:
         self.remove_unprofitable_btn.setText('Remove bad items')
         self.remove_unprofitable_btn.clicked.connect(lambda: self.open_progress_bar_window('unprofitable'))
         self.buttons_layout_left.addWidget(self.remove_unprofitable_btn)
+        
+        self.upload_table_btn = GetJSONButton(self.page)
+        self.upload_table_btn.setGeometry(QtCore.QRect(1051, 15, 30, 30))
+        self.upload_table_btn.clicked.connect(self.upload_table)
     
+    def upload_table(self):
+        dlg = QtWidgets.QFileDialog()
+        directory = dlg.getExistingDirectory(self.page, 'Select folder')
+
+        if directory != '':
+            items = get_items()
+            user = get_user()
+            data = []
+
+            for item in items:
+                name, game_id = parse(item.steam_url)
+                data.append({'name': name, 'game': game_id, 'url': item.steam_url})
+
+            with open(f'{directory}/{user.account_name}_items.json', 'w') as f:
+                f.write(json.dumps(data, indent=4))
+          
     def update_table(self):
         dlg = QtWidgets.QFileDialog()
         path_to_json_file = dlg.getOpenFileName(

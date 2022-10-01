@@ -5,7 +5,10 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 
 from core.threads import SteamGuardTimer, Start
 from core.db.methods import get_secrets
-from .modals import AccountSelectModalWindow, ConfirmModalWindow
+from .modals import AccountSelectModalWindow, ConfirmModalWindow, SettingsModalWindow
+
+
+from ui.components.buttons.SettingsButton.SettingsButton import SettingsButton
 
 
 class Sidebar:
@@ -69,6 +72,15 @@ class Sidebar:
             self.confirmation_button.setGeometry(QtCore.QRect(0, 55, 181, 41))
             self.confirmation_button.setObjectName('confirmation-btn')
             self.confirmation_button.clicked.connect(self.open_confirmation)
+            
+            
+        self.settings_button1 = SettingsButton(self.sidebar)
+        self.settings_button1.setGeometry(QtCore.QRect(140, 675, 30, 30))
+        self.settings_button1.clicked.connect(self.open_settings)
+        
+    def open_settings(self):
+        self.s = SettingsModalWindow()
+        self.s.show()
     
     def open_confirmation(self):
         self.t = ConfirmModalWindow(self.session)
@@ -98,10 +110,10 @@ class Sidebar:
     def username(self):
         self.username = QtWidgets.QPushButton(self.sidebar)
         width = self.username_width
-        account_name = f'{self.user.account_name[:7]}...' if width == 112 else self.user.account_name
-        self.username.setGeometry(QtCore.QRect(60, 675, width, 30))
+        account_name = f'{self.user.account_name[:4]}...' if width > 74 else self.user.account_name
+        self.username.setGeometry(QtCore.QRect(60, 675, 74, 30))
         self.username.setText(account_name)
-        self.username.setStyleSheet('QPushButton {border: 1px solid #25262c; background-color: #25262c; font-size: 14; color: white; padding: 5px; border-radius: 4px;} QPushButton::hover {background-color: #60626e}')
+        self.username.setStyleSheet('QPushButton {border: 1px solid #25262c; background-color: #25262c; font-size: 14; color: white; padding: 5px; border-radius: 4px;} QPushButton::hover {background-color: #48484D}')
         self.username.clicked.connect(self.select_account)
 
     @property

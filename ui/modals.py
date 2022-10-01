@@ -2,7 +2,7 @@ import time
 import sip
 import urllib.request
 
-from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5 import QtCore, QtWidgets, QtGui, Qt
 
 from steamlib.client import SteamClient
 from steamlib.confirmation import ConfirmExecutor
@@ -12,6 +12,10 @@ from steamlib.models import APIEndpoint
 from core.db.methods import add_user, add_item, get_users, delete_user, change_user, get_last_added_user, get_secrets, get_items
 from core.threads import ProgressBarThread, DeleteUnprofitableThread
 import requests
+
+
+from .components.checkboxes.ToggleCheckbox.ToggleCheckbox import AnimatedToggle
+from.components.buttons.GuardButton.GuardButton import GuardButton
 
 
 class AddItemModalWindow(QtWidgets.QMainWindow):
@@ -705,4 +709,54 @@ class ProgressBarModalWindow(QtWidgets.QMainWindow):
             self.table.delete_item(item.name)
 
     
+class SettingsModalWindow(QtWidgets.QMainWindow):
     
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        with open('steam-trade/ui/css/modals.css') as style:
+            styles = style.read()
+        self.WIDTH, self.HEIGHT = 200, 200
+        self.setFixedSize(self.WIDTH, self.HEIGHT)
+        self.setWindowFlags(Qt.Qt.FramelessWindowHint | Qt.Qt.Popup)
+        self.setAttribute(Qt.Qt.WA_TranslucentBackground)
+        
+        self.central_widget = QtWidgets.QWidget(self)
+        self.central_widget.resize(self.WIDTH, self.HEIGHT)
+        self.central_widget.setObjectName('settingsCentralWidget')
+        
+        self.title_lbl = QtWidgets.QLabel(self)
+        self.title_lbl.setText('Settings')
+        self.title_lbl.setGeometry(0, 5, 200, 30)
+        self.title_lbl.setAlignment(QtCore.Qt.AlignCenter)
+        self.title_lbl.setObjectName('settingsTitleLabel')
+        
+        self.autoconfirm_lbl = QtWidgets.QLabel(self)
+        self.autoconfirm_lbl.setText('Autoconfirm')
+        self.autoconfirm_lbl.setGeometry(15, 55, 100, 20)
+        self.autoconfirm_lbl.setObjectName('settingsAutoconfirmLabel')
+        
+        self.autoconfirm_checkbox = AnimatedToggle(
+            self,
+            checked_color="#3c50fa",
+            bar_color=QtGui.QColor(69, 72, 80),
+            handle_color=QtGui.QColor(172, 172, 174)
+        )
+        self.autoconfirm_checkbox.setGeometry(130, 45, 60, 40)
+        
+        self.guard_lbl = QtWidgets.QLabel(self)
+        self.guard_lbl.setText('Steam guard')
+        self.guard_lbl.setObjectName('settingsGuardLabel')
+        self.guard_lbl.setGeometry(15, 95, 100, 20)
+        
+        self.guard_btn = GuardButton(self)
+        self.guard_btn.setGeometry(138, 90, 40, 30)
+        
+        self.setStyleSheet(styles)
+        self.center()
+    
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QtWidgets.QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft()) 
+           

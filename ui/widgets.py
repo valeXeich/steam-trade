@@ -1,20 +1,19 @@
 import logging
-from signal import signal
+
 import requests
-from PyQt5 import QtWidgets, QtCore, QtGui
 
-from core.threads import SteamGuardTimer, Start
-from core.db.methods import get_secrets
-from .modals import AccountSelectModalWindow, ConfirmModalWindow, SettingsModalWindow
+from PyQt5 import QtCore, QtGui, QtWidgets
 
-
+from core.threads import Start, SteamGuardTimer
 from ui.components.buttons.SettingsButton.SettingsButton import SettingsButton
+
+from .modals import (AccountSelectModalWindow, ConfirmModalWindow,
+                     SettingsModalWindow)
 
 
 class Sidebar:
-    
     def __init__(self, parent, user, session, guard, secrets) -> None:
-        with open('steam-trade/ui/css/sidebar.css') as style:
+        with open("steam-trade/ui/styles/sidebar.qss") as style:
             self.styles = style.read()
         self.parent = parent
         self.sidebar = QtWidgets.QWidget(self.parent)
@@ -34,68 +33,62 @@ class Sidebar:
 
     def buttons_box(self):
         self.buttons_area = QtWidgets.QFrame(self.sidebar)
-        if self.secrets['identity_secret']:
+        if self.secrets["identity_secret"]:
             self.buttons_area.setGeometry(QtCore.QRect(0, 105, 181, 191))
         else:
             self.buttons_area.setGeometry(QtCore.QRect(0, 60, 181, 191))
         self.buttons_area.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.buttons_area.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.buttons_area.setObjectName('buttons_area')
+        self.buttons_area.setObjectName("buttons_area")
         return self.buttons_area
 
     def buttons(self):
         self.table_button = QtWidgets.QPushButton(self.buttons_area)
         self.table_button.setGeometry(QtCore.QRect(0, 0, 181, 41))
         self.table_button.setObjectName("active-btn")
-        self.table_button.setText('Table')
+        self.table_button.setText("Table")
 
         self.log_button = QtWidgets.QPushButton(self.buttons_area)
         self.log_button.setGeometry(QtCore.QRect(0, 40, 181, 41))
         self.log_button.setObjectName("un-active-btn")
-        self.log_button.setText('Logs')
+        self.log_button.setText("Logs")
 
-        self.settings_button = QtWidgets.QPushButton(self.buttons_area)
-        self.settings_button.setGeometry(QtCore.QRect(0, 80, 181, 41))
-        self.settings_button.setObjectName("un-active-btn")
-        self.settings_button.setText('Settings')
+        self.settings_button = SettingsButton(self.sidebar)
+        self.settings_button.setGeometry(QtCore.QRect(140, 675, 30, 30))
+        self.settings_button.clicked.connect(self.open_settings)
 
         self.start_button = QtWidgets.QPushButton(self.sidebar)
-        self.start_button.setText('ON')
+        self.start_button.setText("ON")
         self.start_button.setGeometry(QtCore.QRect(0, 10, 181, 41))
-        self.start_button.setObjectName('btn-on')
+        self.start_button.setObjectName("btn-on")
         self.launch = Start(self.session)
         self.start_button.clicked.connect(self.switch)
 
-        if self.secrets['identity_secret']:
+        if self.secrets["identity_secret"]:
             self.confirmation_button = QtWidgets.QPushButton(self.sidebar)
-            self.confirmation_button.setText('Confirmation')
+            self.confirmation_button.setText("Confirmation")
             self.confirmation_button.setGeometry(QtCore.QRect(0, 55, 181, 41))
-            self.confirmation_button.setObjectName('confirmation-btn')
+            self.confirmation_button.setObjectName("confirmation-btn")
             self.confirmation_button.clicked.connect(self.open_confirmation)
-            
-            
-        self.settings_button1 = SettingsButton(self.sidebar)
-        self.settings_button1.setGeometry(QtCore.QRect(140, 675, 30, 30))
-        self.settings_button1.clicked.connect(self.open_settings)
-        
+
     def open_settings(self):
-        self.s = SettingsModalWindow()
+        self.s = SettingsModalWindow(self.guard, self.parent)
         self.s.show()
-    
+
     def open_confirmation(self):
         self.t = ConfirmModalWindow(self.session)
         self.t.setupUi()
         self.t.show()
-    
+
     def switch(self):
         if not self.launch.isRunning():
-            self.start_button.setObjectName('btn-off')
-            self.start_button.setText('OFF')
+            self.start_button.setObjectName("btn-off")
+            self.start_button.setText("OFF")
             self.start_button.setStyleSheet(self.styles)
             self.launch.start()
         else:
-            self.start_button.setObjectName('btn-on')
-            self.start_button.setText('ON')
+            self.start_button.setObjectName("btn-on")
+            self.start_button.setText("ON")
             self.start_button.setStyleSheet(self.styles)
             self.launch.stop()
 
@@ -103,25 +96,30 @@ class Sidebar:
         self.avatar = QtGui.QImage()
         self.avatar.loadFromData(requests.get(self.user.avatar).content)
         self.avatar_lbl = QtWidgets.QLabel(self.sidebar)
-        self.avatar_lbl.setGeometry(QtCore.QRect(10, 669, 41, 41))   
+        self.avatar_lbl.setGeometry(QtCore.QRect(10, 669, 41, 41))
         self.avatar_lbl.setPixmap(QtGui.QPixmap(self.avatar))
-        self.avatar_lbl.setScaledContents(True)  
-    
+        self.avatar_lbl.setScaledContents(True)
+
     def username(self):
         self.username = QtWidgets.QPushButton(self.sidebar)
         width = self.username_width
-        account_name = f'{self.user.account_name[:4]}...' if width > 74 else self.user.account_name
+        account_name = (
+            f"{self.user.account_name[:4]}..." if width > 74 else self.user.account_name
+        )
         self.username.setGeometry(QtCore.QRect(60, 675, 74, 30))
         self.username.setText(account_name)
-        self.username.setStyleSheet('QPushButton {border: 1px solid #25262c; background-color: #25262c; font-size: 14; color: white; padding: 5px; border-radius: 4px;} QPushButton::hover {background-color: #48484D}')
+        self.username.setObjectName("username")
         self.username.clicked.connect(self.select_account)
 
     @property
     def username_width(self):
         min_width = 74
         max_width = 112
-        login_width = self.username.fontMetrics().boundingRect(self.user.account_name).width() + 10
-        
+        login_width = (
+            self.username.fontMetrics().boundingRect(self.user.account_name).width()
+            + 10
+        )
+
         if min_width < login_width < max_width:
             return login_width
 
@@ -131,14 +129,14 @@ class Sidebar:
         self.account_select = AccountSelectModalWindow(self.parent.restart)
         self.account_select.setupUi()
         self.account_select.show()
-        
+
     def steam_guard_code(self):
         self.code = QtWidgets.QLabel(self.sidebar)
         self.code.setGeometry(QtCore.QRect(70, 600, 181, 41))
-        self.code.setObjectName('code')
+        self.code.setObjectName("code")
         self.code.setText(self.guard.get_code())
         self.code.mouseDoubleClickEvent = self.copy_code_to_clipboard
-        
+
         self.pbar = QtWidgets.QProgressBar(self.sidebar)
         self.pbar.setGeometry(QtCore.QRect(10, 640, 161, 10))
         self.pbar.setMaximum(30)
@@ -147,12 +145,12 @@ class Sidebar:
         self.code_timer = SteamGuardTimer(self.guard)
         self.code_timer.counter.connect(self.code_timer_change)
         self.code_timer.start()
-               
-    def copy_code_to_clipboard(self, event):
+
+    def copy_code_to_clipboard(self, event: QtGui.QMouseEvent):
         clipboard = QtWidgets.QApplication.clipboard()
         clipboard.setText(self.code.text())
-        
-    def code_timer_change(self, value):
+
+    def code_timer_change(self, value: int):
         self.pbar.setValue(value)
         if value == 0:
             self.code.setText(self.guard.get_code())
@@ -167,22 +165,19 @@ class QTextEditLogger(logging.Handler, QtCore.QObject):
         self.log_widget = QtWidgets.QTextEdit(parent)
         self.log_widget.setReadOnly(True)
         self.appendPlainText.connect(self.add_log_to_widget)
-        
+
     def emit(self, record):
         msg = self.format(record)
         self.appendPlainText.emit(msg)
-        
-    def add_log_to_widget(self, value):
-        if 'order' in value:
+
+    def add_log_to_widget(self, value: str):
+        if "order" in value:
             self.log_widget.setTextColor(QtGui.QColor(59, 165, 93))
-        if 'sale' in value:
+        if "sale" in value:
             self.log_widget.setTextColor(QtGui.QColor(36, 138, 211))
         self.log_widget.append(value)
 
 
 class ReadOnlyDelegate(QtWidgets.QStyledItemDelegate):
     def createEditor(self, parent, option, index):
-        return 
-
-
- 
+        return

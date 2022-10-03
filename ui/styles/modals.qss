@@ -19,13 +19,13 @@
     color: #acacae;
 }
 
-#login-title, #code-title, #account-title {
+#login-title, #code-title, #account-title, #sms-title {
     color: #acacae;
     font-weight: bold;
     font-size: 24px;
 }
 
-#AddItemModal, #Login, #Code, #Confirm, #AccountSelect, #ProgressBar {
+#AddItemModal, #Login, #Code, #Confirm, #AccountSelect, #ProgressBar, #SMSCode {
     background-color: #1b1c22;
 }
 
@@ -129,7 +129,7 @@ QPushButton::hover#switch_btn {
     font-size: 24px;
 }
 
-#settingsAutoconfirmLabel, #settingsGuardLabel {
+#settingsAutoconfirmLabel, #settingsGuardLabel, #settingsAnalisysLabel {
     color: #acacae; 
     font-weight: bold;
 }

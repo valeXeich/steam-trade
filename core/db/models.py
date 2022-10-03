@@ -38,7 +38,6 @@ class Item(Base):
     sell_item = Column(Boolean, default=False)
     buy_price = Column(Float(precision=2), default=0)
     sell_price = Column(Float(precision=2), default=0)
-    analysis = Column(Boolean, default=False)
     steam_url = Column(String(150))
     created_date = Column(DateTime, default=datetime.datetime.now, nullable=False)
     game = Column(Integer, ForeignKey('Game.pk'), nullable=False)
@@ -79,3 +78,12 @@ class Game(Base):
     
     def __str__(self) -> str:
         return f'Game: {self.name}'
+    
+
+class Setting(Base):
+    __tablename__ = 'Setting'
+
+    pk = Column(Integer, primary_key=True)
+    analysis = Column(Boolean, default=False)
+    autoconfirm = Column(Boolean, default=False)
+    user = Column(Integer, ForeignKey('User.pk'), nullable=False)

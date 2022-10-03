@@ -75,3 +75,16 @@ QProgressBar::chunk {
 #confirmation-btn::hover {
     background-color: rgb(42, 54, 165);
 }
+
+#username {
+    border: 1px solid #25262c; 
+    background-color: #25262c; 
+    font-size: 14; 
+    color: white; 
+    padding: 5px; 
+    border-radius: 4px;
+}
+
+#username::hover {
+    background-color: #48484D
+}

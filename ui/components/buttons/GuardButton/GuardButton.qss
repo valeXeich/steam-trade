@@ -1,12 +1,26 @@
-QPushButton#GuardButton {
+QPushButton#GuardButtonAdd {
     background-color: #25262c;
     border-radius: 6px;
     image: url("steam-trade/ui/assets/guard_add.png");
     padding: 5;
 }
 
-QPushButton:hover#GuardButton {
+QPushButton:hover#GuardButtonAdd {
     background-color: #454850; 
     border-radius: 6px;
     border: none;
 }
+
+QPushButton#GuardButtonRemove {
+    background-color: #25262c;
+    border-radius: 6px;
+    image: url("steam-trade/ui/assets/guard_remove.png");
+    padding: 5;
+}
+
+QPushButton:hover#GuardButtonRemove {
+    background-color: #454850; 
+    border-radius: 6px;
+    border: none;
+}
+

@@ -97,6 +97,7 @@ def get_items_count() -> int:
     amount = dbsession.query(Item).filter(Item.user == user.pk).count()
     return amount
 
+
 def add_item(
     url,
     name: Optional[str] = None,
@@ -127,10 +128,25 @@ def add_item(
 
 def add_items(path: str):
     user = get_user()
+    
     with open(path) as items_json:
         items = json.load(items_json)
-    for item in items:
-        add_item(item["url"], name=item["name"], game_id=item["game"], user=user)
+    
+    for item in items: 
+        name, game_id = parse(item["url"])
+        games = {
+            "730": "CS:GO",
+            "570": "DOTA2",
+            "440": "TF2",
+            "753": "STEAM",
+        }
+
+        if get_item(name) is None:
+            game = dbsession.query(Game).filter(Game.name == games[game_id]).first()
+            item = Item(name=name, steam_url=item["url"], game=game.pk, user=user.pk)
+            dbsession.add(item)
+            
+    dbsession.commit()
 
 
 def delete_item(name: str):

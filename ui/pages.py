@@ -10,7 +10,8 @@ from core.db.methods import (add_items, check_buy_items, check_sell_items,
                              get_user, set_amount, set_amount_all,
                              set_buy_item, set_buy_items, set_buy_price,
                              set_buy_price_all, set_sell_item, set_sell_items,
-                             set_sell_price, set_sell_price_all, get_items_count)
+                             set_sell_price, set_sell_price_all, 
+                             get_items_count)
 from core.db.models import Item
 from core.utils import parse
 
@@ -67,11 +68,8 @@ class TablePage:
         self.table.setHorizontalHeaderLabels(
             ["Item", "Amount", "Buy", "Sell", "Purchase", "Selling", "Action"]
         )
-        self.table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Fixed)
-        if self.items_count > 17:
-            self.table.setColumnWidth(0, 428)
-        else:
-            self.table.setColumnWidth(0, 438)
+        
+        self.table.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         self.table.setColumnWidth(1, 80)
         self.table.setColumnWidth(4, 120)
         self.table.setColumnWidth(5, 120)
@@ -357,7 +355,7 @@ class TablePage:
             self.table.setRowCount(1)
             add_items(path_to_json_file)
             items = get_items()
-
+            
             self.table.horizontalHeader().show()
             self.no_items_label.hide()
             self.action_all()
@@ -366,6 +364,7 @@ class TablePage:
                 row = self.table.rowCount()
                 self.table.insertRow(row)
                 self.add_item_to_table(item, row)
+            
             self.items_count = get_items_count()
             self.label_count_of_items.setText(f'Count of items: {self.items_count}')
 

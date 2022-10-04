@@ -90,7 +90,12 @@ def get_items() -> List[Item]:
     user = get_user()
     items = dbsession.query(Item).filter(Item.user == user.pk).all()
     return items
+ 
 
+def get_items_count() -> int:
+    user = get_user()
+    amount = dbsession.query(Item).filter(Item.user == user.pk).count()
+    return amount
 
 def add_item(
     url,
@@ -267,21 +272,21 @@ def get_game_by_pk(pk: int) -> Game:
     return game
 
 
-def get_items_sell(analysis: bool = False) -> List[Item]:
+def get_items_sell() -> List[Item]:
     user = get_user()
     items = (
         dbsession.query(Item)
-        .filter(Item.sell_item == True, Item.analysis == analysis, Item.user == user.pk)
+        .filter(Item.sell_item == True, Item.user == user.pk)
         .all()
     )
     return items
 
 
-def get_items_buy(analysis: bool = False) -> List[Item]:
+def get_items_buy() -> List[Item]:
     user = get_user()
     items = (
         dbsession.query(Item)
-        .filter(Item.buy_item == True, Item.analysis == analysis, Item.user == user.pk)
+        .filter(Item.buy_item == True, Item.user == user.pk)
         .all()
     )
     return items

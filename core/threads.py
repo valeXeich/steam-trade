@@ -91,10 +91,10 @@ class Start(QtCore.QThread):
     def run(self):
         self.active = not self.active
         market = Market(self.session, self.secrets)
-        autoconfirm = self.setting["autocommit"]
+        autoconfirm = self.setting["autoconfirm"]
         while self.active:
             if self.setting["analysis"]:
-                market.create_buy_orders_analysis(Currency.UAH, autoconfirm)
+                market.create_buy_orders_analysis(Currency.UAH)
                 market.create_sell_orders_analysis(Currency.UAH, autoconfirm)
             else:
                 market.create_buy_orders(Currency.UAH, autoconfirm)

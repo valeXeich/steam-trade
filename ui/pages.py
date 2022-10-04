@@ -10,7 +10,7 @@ from core.db.methods import (add_items, check_buy_items, check_sell_items,
                              get_user, set_amount, set_amount_all,
                              set_buy_item, set_buy_items, set_buy_price,
                              set_buy_price_all, set_sell_item, set_sell_items,
-                             set_sell_price, set_sell_price_all)
+                             set_sell_price, set_sell_price_all, get_items_count)
 from core.db.models import Item
 from core.utils import parse
 
@@ -23,6 +23,7 @@ class TablePage:
     def __init__(self, items, market):
         self.items = items
         self.market = market
+        self.items_count = get_items_count()
         with open("steam-trade/ui/styles/table-page.qss") as style:
             styles = style.read()
         self.page = QtWidgets.QWidget()
@@ -33,6 +34,7 @@ class TablePage:
         self.buttons_box()
         self.load_items()
         self.inputs()
+        self.count_of_items()
 
     def inputs(self):
         self.search_input = QtWidgets.QLineEdit(self.page)
@@ -66,7 +68,10 @@ class TablePage:
             ["Item", "Amount", "Buy", "Sell", "Purchase", "Selling", "Action"]
         )
         self.table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Fixed)
-        self.table.setColumnWidth(0, 438)
+        if self.items_count > 17:
+            self.table.setColumnWidth(0, 428)
+        else:
+            self.table.setColumnWidth(0, 438)
         self.table.setColumnWidth(1, 80)
         self.table.setColumnWidth(4, 120)
         self.table.setColumnWidth(5, 120)
@@ -84,6 +89,13 @@ class TablePage:
         if not self.items:
             self.table.horizontalHeader().hide()
             self.no_items_label.show()
+    
+    def count_of_items(self):
+        self.label_count_of_items = QtWidgets.QLabel(self.page)
+        self.label_count_of_items.setText(f'Count of items: {self.items_count}')
+        self.label_count_of_items.setGeometry(QtCore.QRect(700, 15, 200, 31))
+        self.label_count_of_items.setObjectName("count-items")
+
 
     def set_item_value(self, item: QtWidgets.QTableWidgetItem):
         row, column = item.row(), item.column()
@@ -199,17 +211,23 @@ class TablePage:
         row = self.table.currentRow()
         delete_item(name)
         self.table.removeRow(row)
-
+        self.items_count -= 1
+        
         if not get_items():
             self.table.setRowCount(0)
             self.table.horizontalHeader().hide()
             self.no_items_label.show()
+            self.items_count = 0
+        self.label_count_of_items.setText(f'Count of items: {self.items_count}')
 
     def delete_items(self):
         delete_items()
         self.table.setRowCount(0)
         self.table.horizontalHeader().hide()
         self.no_items_label.show()
+
+        self.items_count = 0
+        self.label_count_of_items.setText(f'Count of items: {self.items_count}')
 
     def action_all(self):
         widget_buy = QtWidgets.QWidget()
@@ -348,6 +366,8 @@ class TablePage:
                 row = self.table.rowCount()
                 self.table.insertRow(row)
                 self.add_item_to_table(item, row)
+            self.items_count = get_items_count()
+            self.label_count_of_items.setText(f'Count of items: {self.items_count}')
 
     def validate_items_file(self, path: str):
         with open(path) as items_json:

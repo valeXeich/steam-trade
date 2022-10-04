@@ -12,12 +12,19 @@ from steamlib.utils import get_highest_buy_order, get_lowest_sell_order
 from .db.models import BuyerToReceive, Game, Item
 
 
+def get_log_ex_message(ex):
+    if '107' in str(ex):
+        return "User doesn't have enough money to buy item"
+    if '25' in str(ex):
+        return str(ex).split('.')[1]
+    
+
 def get_correct_price(price: str) -> str:
     data = str(price).split(".")
-    if len(data[-1]) == 1:
-        price = str(price) + "0"
-    elif len(data) == 1:
+    if len(data) == 1:
         price = str(price) + ".00"
+    elif len(data[-1]) == 1:
+        price = str(price) + "0"
     return price
 
 
@@ -39,7 +46,7 @@ def get_price(currency: dict, item_name_id: str, method: str) -> str:
         )
         if result[0] == "0":
             return result[1:]
-        return result
+        return int(result)
     else:
         highest_buy_order = (
             int(get_highest_buy_order(currency, item_name_id)["pennies"]) + 1
@@ -114,7 +121,7 @@ def get_game_by_id(game_pk: int) -> dict:
 
 def item_in_orders(buy_orders: dict, item: Item) -> bool:
     for order in buy_orders:
-        if buy_orders[order]["name"] == item.name:
+        if buy_orders[order]["name"].strip() == item.name:
             return True
     return False
 

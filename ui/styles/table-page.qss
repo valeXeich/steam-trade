@@ -1,4 +1,4 @@
-#table_page {
+#table_page, #count-items {
     color: #acacae;
 }
 

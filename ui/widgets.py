@@ -171,9 +171,11 @@ class QTextEditLogger(logging.Handler, QtCore.QObject):
         self.appendPlainText.emit(msg)
 
     def add_log_to_widget(self, value: str):
-        if "order" in value:
+        if "wasn't placed" in value:
+            self.log_widget.setTextColor(QtGui.QColor(181, 81, 81))
+        elif "order" in value:
             self.log_widget.setTextColor(QtGui.QColor(59, 165, 93))
-        if "sale" in value:
+        elif "sale" in value:
             self.log_widget.setTextColor(QtGui.QColor(36, 138, 211))
         self.log_widget.append(value)
 

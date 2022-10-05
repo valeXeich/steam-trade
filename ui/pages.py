@@ -91,7 +91,7 @@ class TablePage:
     def count_of_items(self):
         self.label_count_of_items = QtWidgets.QLabel(self.page)
         self.label_count_of_items.setText(f'Count of items: {self.items_count}')
-        self.label_count_of_items.setGeometry(QtCore.QRect(700, 15, 200, 31))
+        self.label_count_of_items.setGeometry(QtCore.QRect(680, 15, 150, 31))
         self.label_count_of_items.setObjectName("count-items")
 
 

@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 from PyQt5 import QtCore, QtWidgets
 
@@ -14,7 +15,7 @@ from ui.widgets import Sidebar
 
 class MainWindow(QtWidgets.QMainWindow):
     def setupUi(self):
-        with open("steam-trade/ui/styles/main.qss") as style:
+        with open(f"{Path(__file__).parent}/ui/styles/main.qss") as style:
             styles = style.read()
         self.user = get_user()
         self.setWindowTitle('Steam Arbitrage')

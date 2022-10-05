@@ -1,7 +1,6 @@
 QPushButton#SettingsButton {
     background-color: #25262c;
     border-radius: 6px;
-    image: url("steam-trade/ui/assets/settings.png");
     padding: 5;
 }
 

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from PyQt5 import QtWidgets, QtGui, Qt
 
 
@@ -10,6 +12,6 @@ class DefaultButton(QtWidgets.QPushButton):
         
     def setup(self):
         self.setObjectName('DefaultButton')
-        with open('steam-trade/ui/components/buttons/DefaultButton/DefaultButton.qss') as style:
+        with open(f'{Path(__file__).parent}/DefaultButton.qss') as style:
             self.setStyleSheet(style)
         

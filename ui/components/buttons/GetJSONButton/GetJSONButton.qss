@@ -1,7 +1,6 @@
 QPushButton#GetJSONButton {
     background-color: #1b1c22;
     border-radius: 6px;
-    image: url("steam-trade/ui/assets/get_json.png");
 }
 
 QPushButton:hover#GetJSONButton {

@@ -1,6 +1,7 @@
 import time
 import urllib.request
 from typing import List
+from pathlib import Path
 
 import requests
 import sip
@@ -23,13 +24,16 @@ from .components.buttons.GuardButton.GuardButton import GuardButton
 from .components.checkboxes.ToggleCheckbox.ToggleCheckbox import AnimatedToggle
 
 
+path = Path(__file__).parent
+
+
 class AddItemModalWindow(QtWidgets.QMainWindow):
     def __init__(self, table_page):
         super().__init__()
         self.table_page = table_page
 
     def setupUi(self):
-        with open("steam-trade/ui/styles/modals.qss") as style:
+        with open(f"{path}/styles/modals.qss") as style:
             styles = style.read()
         self.setObjectName("AddItemModal")
         self.setWindowTitle("Add Item")
@@ -106,7 +110,7 @@ class LoginModalWindow(QtWidgets.QMainWindow):
         self.captcha_data = {"captcha_gid": "", "captcha_text": ""}
 
     def setupUi(self):
-        with open("steam-trade/ui/styles/modals.qss") as style:
+        with open(f"{path}/styles/modals.qss") as style:
             styles = style.read()
         self.setObjectName("Login")
         self.setFixedSize(441, 250)
@@ -251,7 +255,7 @@ class CodeModalWindow(QtWidgets.QMainWindow):
         self.email = is_email_need
 
     def setupUi(self):
-        with open("steam-trade/ui/styles/modals.qss") as style:
+        with open(f"{path}/styles/modals.qss") as style:
             styles = style.read()
         self.setObjectName("Code")
         self.setWindowTitle("Code")
@@ -367,7 +371,7 @@ class AccountSelectModalWindow(QtWidgets.QMainWindow):
         self.restart = restart
 
     def setupUi(self):
-        with open("steam-trade/ui/styles/modals.qss") as style:
+        with open(f"{path}/styles/modals.qss") as style:
             styles = style.read()
         self.setObjectName("AccountSelect")
         self.setWindowTitle('Select Account')
@@ -516,7 +520,7 @@ class ConfirmModalWindow(QtWidgets.QMainWindow):
         self.items = self.confirmation.conf_items
 
     def setupUi(self):
-        with open("steam-trade/ui/styles/modals.qss") as style:
+        with open(f"{path}/styles/modals.qss") as style:
             styles = style.read()
         self.setObjectName("Confirm")
         self.setWindowTitle('Confirmations')
@@ -725,7 +729,7 @@ class ProgressBarModalWindow(QtWidgets.QMainWindow):
         self.table = table
 
     def setupUi(self):
-        with open("steam-trade/ui/styles/modals.qss") as style:
+        with open(f"{path}/styles/modals.qss") as style:
             styles = style.read()
         self.setWindowTitle("Remove orders")
         self.setFixedSize(475, 80)
@@ -783,7 +787,7 @@ class SettingsModalWindow(QtWidgets.QMainWindow):
         self.guard = guard
         self.status = self.guard.status["response"]
         self.main_win = main_win
-        with open("steam-trade/ui/styles/modals.qss") as style:
+        with open(f"{path}/styles/modals.qss") as style:
             styles = style.read()
         self.WIDTH, self.HEIGHT = 200, 200
         self.setFixedSize(self.WIDTH, self.HEIGHT)
@@ -881,7 +885,7 @@ class SMSCodeModalWinow(QtWidgets.QMainWindow):
         self.main_win = main_win
 
     def setupUi(self):
-        with open("steam-trade/ui/styles/modals.qss") as style:
+        with open(f"{path}/styles/modals.qss") as style:
             styles = style.read()
         self.setFixedSize(400, 136)
         self.setWindowTitle('Code')

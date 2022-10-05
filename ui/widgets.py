@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import requests
 
@@ -11,9 +12,12 @@ from .modals import (AccountSelectModalWindow, ConfirmModalWindow,
                      SettingsModalWindow)
 
 
+path = Path(__file__).parent
+
+
 class Sidebar:
     def __init__(self, parent, user, session, guard, secrets) -> None:
-        with open("steam-trade/ui/styles/sidebar.qss") as style:
+        with open(f"{path}/styles/sidebar.qss") as style:
             self.styles = style.read()
         self.parent = parent
         self.sidebar = QtWidgets.QWidget(self.parent)

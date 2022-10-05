@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import webbrowser
+from pathlib import Path
 
 from PyQt5 import QtCore, QtWidgets
 
@@ -20,12 +21,15 @@ from .modals import AddItemModalWindow, ProgressBarModalWindow
 from .widgets import QTextEditLogger, ReadOnlyDelegate
 
 
+path = Path(__file__).parent
+
+
 class TablePage:
     def __init__(self, items, market):
         self.items = items
         self.market = market
         self.items_count = get_items_count()
-        with open("steam-trade/ui/styles/table-page.qss") as style:
+        with open(f"{path}/styles/table-page.qss") as style:
             styles = style.read()
         self.page = QtWidgets.QWidget()
         self.page.setObjectName("table_page")
@@ -392,7 +396,7 @@ class TablePage:
 
 class LogPage:
     def __init__(self) -> None:
-        with open("steam-trade/ui/styles/log-page.qss") as style:
+        with open(f"{path}/styles/log-page.qss") as style:
             styles = style.read()
         self.page = QtWidgets.QWidget()
         self.page.setObjectName("log_page")

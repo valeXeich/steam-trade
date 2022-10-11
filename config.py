@@ -1,7 +1,7 @@
 from pathlib import Path
 
 if 'dist' in __file__:
-    PATH_TO_DB = f"{Path(__file__).parent}/db/sta.db"
+    PATH_TO_DB = f"{Path(__file__).parent}/sta.db"
     PATH_TO_STYLES = f"{Path(__file__).parent}/ui/styles/"
     PATH_TO_ASSETS = f"{Path(__file__).parent}/ui/assets/"
     

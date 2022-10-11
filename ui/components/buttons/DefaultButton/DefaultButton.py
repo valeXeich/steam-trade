@@ -10,8 +10,8 @@ class DefaultButton(QtWidgets.QPushButton):
         self.setCursor(QtGui.QCursor(Qt.Qt.PointingHandCursor))
         self.setup()
         
-    def setup(self):
-        self.setObjectName('DefaultButton')
-        with open(f'{Path(__file__).parent}/DefaultButton.qss') as style:
-            self.setStyleSheet(style)
+    # def setup(self):
+    #     self.setObjectName('DefaultButton')
+    #     with open(f'{Path(__file__).parent}/DefaultButton.qss') as style:
+    #         self.setStyleSheet(style)
         

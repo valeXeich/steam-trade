@@ -8,6 +8,7 @@ import sip
 
 from PyQt5 import Qt, QtCore, QtGui, QtWidgets
 
+from config import PATH_TO_MODALS_STYLES
 from core.db.methods import (add_item, add_user, change_analysis_setting,
                              change_autoconfirm_setting, change_secrets,
                              change_user, delete_user, get_items,
@@ -24,16 +25,13 @@ from .components.buttons.GuardButton.GuardButton import GuardButton
 from .components.checkboxes.ToggleCheckbox.ToggleCheckbox import AnimatedToggle
 
 
-path = Path(__file__).parent
-
-
 class AddItemModalWindow(QtWidgets.QMainWindow):
     def __init__(self, table_page):
         super().__init__()
         self.table_page = table_page
 
     def setupUi(self):
-        with open(f"{path}/styles/modals.qss") as style:
+        with open(PATH_TO_MODALS_STYLES) as style:
             styles = style.read()
         self.setObjectName("AddItemModal")
         self.setWindowTitle("Add Item")
@@ -110,7 +108,7 @@ class LoginModalWindow(QtWidgets.QMainWindow):
         self.captcha_data = {"captcha_gid": "", "captcha_text": ""}
 
     def setupUi(self):
-        with open(f"{path}/styles/modals.qss") as style:
+        with open(PATH_TO_MODALS_STYLES) as style:
             styles = style.read()
         self.setObjectName("Login")
         self.setFixedSize(441, 250)
@@ -255,7 +253,7 @@ class CodeModalWindow(QtWidgets.QMainWindow):
         self.email = is_email_need
 
     def setupUi(self):
-        with open(f"{path}/styles/modals.qss") as style:
+        with open(PATH_TO_MODALS_STYLES) as style:
             styles = style.read()
         self.setObjectName("Code")
         self.setWindowTitle("Code")
@@ -371,7 +369,7 @@ class AccountSelectModalWindow(QtWidgets.QMainWindow):
         self.restart = restart
 
     def setupUi(self):
-        with open(f"{path}/styles/modals.qss") as style:
+        with open(PATH_TO_MODALS_STYLES) as style:
             styles = style.read()
         self.setObjectName("AccountSelect")
         self.setWindowTitle('Select Account')
@@ -520,7 +518,7 @@ class ConfirmModalWindow(QtWidgets.QMainWindow):
         self.items = self.confirmation.conf_items
 
     def setupUi(self):
-        with open(f"{path}/styles/modals.qss") as style:
+        with open(PATH_TO_MODALS_STYLES) as style:
             styles = style.read()
         self.setObjectName("Confirm")
         self.setWindowTitle('Confirmations')
@@ -729,7 +727,7 @@ class ProgressBarModalWindow(QtWidgets.QMainWindow):
         self.table = table
 
     def setupUi(self):
-        with open(f"{path}/styles/modals.qss") as style:
+        with open(PATH_TO_MODALS_STYLES) as style:
             styles = style.read()
         self.setWindowTitle("Remove orders")
         self.setFixedSize(475, 80)
@@ -787,7 +785,7 @@ class SettingsModalWindow(QtWidgets.QMainWindow):
         self.guard = guard
         self.status = self.guard.status["response"]
         self.main_win = main_win
-        with open(f"{path}/styles/modals.qss") as style:
+        with open(PATH_TO_MODALS_STYLES) as style:
             styles = style.read()
         self.WIDTH, self.HEIGHT = 200, 200
         self.setFixedSize(self.WIDTH, self.HEIGHT)
@@ -885,7 +883,7 @@ class SMSCodeModalWinow(QtWidgets.QMainWindow):
         self.main_win = main_win
 
     def setupUi(self):
-        with open(f"{path}/styles/modals.qss") as style:
+        with open(PATH_TO_MODALS_STYLES) as style:
             styles = style.read()
         self.setFixedSize(400, 136)
         self.setWindowTitle('Code')

@@ -2,10 +2,10 @@ import json
 import logging
 import os
 import webbrowser
-from pathlib import Path
 
 from PyQt5 import QtCore, QtWidgets
 
+from config import PATH_TO_TABLE_PAGE_STYLES, PATH_TO_LOG_PAGE_STYLES
 from core.db.methods import (add_items, check_buy_items, check_sell_items,
                              delete_item, delete_items, get_item, get_items,
                              get_user, set_amount, set_amount_all,
@@ -21,15 +21,12 @@ from .modals import AddItemModalWindow, ProgressBarModalWindow
 from .widgets import QTextEditLogger, ReadOnlyDelegate
 
 
-path = Path(__file__).parent
-
-
 class TablePage:
     def __init__(self, items, market):
         self.items = items
         self.market = market
         self.items_count = get_items_count()
-        with open(f"{path}/styles/table-page.qss") as style:
+        with open(PATH_TO_TABLE_PAGE_STYLES) as style:
             styles = style.read()
         self.page = QtWidgets.QWidget()
         self.page.setObjectName("table_page")
@@ -396,7 +393,7 @@ class TablePage:
 
 class LogPage:
     def __init__(self) -> None:
-        with open(f"{path}/styles/log-page.qss") as style:
+        with open(PATH_TO_LOG_PAGE_STYLES) as style:
             styles = style.read()
         self.page = QtWidgets.QWidget()
         self.page.setObjectName("log_page")

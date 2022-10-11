@@ -3,6 +3,8 @@ from pathlib import Path
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-db_path = f'{Path(__file__).parent}/sta.db'
+from config import PATH_TO_DB
+
+db_path = f'{PATH_TO_DB}'
 engine = create_engine(f'sqlite:///{db_path}', connect_args={'check_same_thread': False})
 dbsession = Session(engine)

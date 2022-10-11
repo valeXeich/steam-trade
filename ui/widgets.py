@@ -1,10 +1,10 @@
 import logging
-from pathlib import Path
 
 import requests
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from config import PATH_TO_SIDEBAR_STYLES
 from core.threads import Start, SteamGuardTimer
 from ui.components.buttons.SettingsButton.SettingsButton import SettingsButton
 
@@ -12,12 +12,9 @@ from .modals import (AccountSelectModalWindow, ConfirmModalWindow,
                      SettingsModalWindow)
 
 
-path = Path(__file__).parent
-
-
 class Sidebar:
     def __init__(self, parent, user, session, guard, secrets) -> None:
-        with open(f"{path}/styles/sidebar.qss") as style:
+        with open(PATH_TO_SIDEBAR_STYLES) as style:
             self.styles = style.read()
         self.parent = parent
         self.sidebar = QtWidgets.QWidget(self.parent)

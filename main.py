@@ -1,8 +1,8 @@
 import sys
-from pathlib import Path
 
 from PyQt5 import QtCore, QtWidgets
 
+from config import PATH_TO_MAIN_STYLES
 from core.db.methods import (create_db, get_items, get_secrets, get_user,
                              is_user_login)
 from core.login import do_login
@@ -15,7 +15,7 @@ from ui.widgets import Sidebar
 
 class MainWindow(QtWidgets.QMainWindow):
     def setupUi(self):
-        with open(f"{Path(__file__).parent}/ui/styles/main.qss") as style:
+        with open(PATH_TO_MAIN_STYLES) as style:
             styles = style.read()
         self.user = get_user()
         self.setWindowTitle('Steam Arbitrage')

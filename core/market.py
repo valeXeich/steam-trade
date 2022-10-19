@@ -16,18 +16,19 @@ class Market(SteamMarket):
 
     def get_inventories(self) -> dict:
         inventories = {
-            'CS:GO': self.get_inventory(Game.CSGO),
-            'DOTA2': self.get_inventory(Game.DOTA2),
-            # 'TF2': self.get_inventory(Game.TF2)
+            'CS:GO': self.get_inventory(Game.CSGO, True),
+            'DOTA2': self.get_inventory(Game.DOTA2, True),
+            'TF2': self.get_inventory(Game.TF2, True)
         }
         return inventories
     
     def get_asset_id(self, item: Item, inventories: dict, assets: list) -> int:
         game = get_game_by_pk(item.game)
-        for item_ in inventories[game.name]:
-            if item_['market_name'] == item.name and item_['assetid'] not in assets:
-                assets.append(item_['assetid'])
-                return item_['assetid']
+        if isinstance(inventories[game.name], list):
+            for item_ in inventories[game.name]:
+                if item_['market_name'] == item.name and item_['assetid'] not in assets:
+                    assets.append(item_['assetid'])
+                    return item_['assetid']
 
     def create_sell_orders_analysis(self, currency: dict, autoconfirm: bool) -> None:
         assets = []
@@ -88,7 +89,10 @@ class Market(SteamMarket):
         buy_orders = self.get_market_listings()['buy_orders']
         for item in items:
             item_name_id = get_item_nameid(item)
-            last_two_orders = get_two_last_sell_orders(currency, item_name_id, self._session)
+            try:
+                last_two_orders = get_two_last_sell_orders(currency, item_name_id, self._session)
+            except IndexError:
+                continue
             price = get_price(currency, item_name_id, 'buy')
             first_receive = get_you_receive(last_two_orders['first_price'])
             second_receive = get_you_receive(last_two_orders['second_price'])
@@ -102,7 +106,10 @@ class Market(SteamMarket):
     
     def delete_unprofitable_item(self, item: Item, currency: dict, buy_orders: dict) -> Item:
         item_name_id = get_item_nameid(item)
-        last_two_orders = get_two_last_sell_orders(currency, item_name_id, self._session)
+        try:
+            last_two_orders = get_two_last_sell_orders(currency, item_name_id, self._session)
+        except IndexError:
+            return
         price = get_price(currency, item_name_id, 'buy')
         first_receive = get_you_receive(last_two_orders['first_price'])
         second_receive = get_you_receive(last_two_orders['second_price'])

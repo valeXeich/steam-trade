@@ -99,7 +99,7 @@ class Start(QtCore.QThread):
             else:
                 market.create_buy_orders(Currency.UAH, autoconfirm)
                 market.create_sell_orders(autoconfirm)
-            time.sleep(30)
+            time.sleep(60)
 
     def stop(self):
         self.active = not self.active

@@ -121,7 +121,7 @@ def get_game_by_id(game_pk: int) -> dict:
 
 def item_in_orders(buy_orders: dict, item: Item) -> bool:
     for order in buy_orders:
-        if buy_orders[order]["name"].strip() == item.name:
+        if buy_orders[order]["name"] == item.name:
             return True
     return False
 
